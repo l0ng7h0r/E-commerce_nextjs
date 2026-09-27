@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Logo } from "../public/ddd.jpg"
 import {
   ShoppingBag,
   ShoppingCart,
@@ -42,11 +43,11 @@ export default function Navbar() {
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-              <ShoppingBag className="w-5 h-5" />
+                
             </div>
             <div>
               <span className="font-bold text-lg tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
-                Nova<span className="text-indigo-600 dark:text-indigo-400">Cart</span>
+                Longtech<span className="text-indigo-600 dark:text-indigo-400">Cart</span>
               </span>
               <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium block -mt-1 tracking-wider uppercase">
                 Modern E-Commerce

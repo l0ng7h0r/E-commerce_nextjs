@@ -166,7 +166,7 @@ export default function ProductDetailPage() {
         <div className="flex flex-col justify-between">
           <div className="space-y-4">
             {categoryName && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-[#0052FF] dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60">
                 <Tag className="w-3.5 h-3.5" />
                 <span>{categoryName}</span>
               </div>
@@ -179,7 +179,7 @@ export default function ProductDetailPage() {
             {/* Price */}
             <div className="pt-2">
               <span className="text-xs text-zinc-400 block font-medium">Price</span>
-              <span className="text-3xl sm:text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">
+              <span className="text-3xl sm:text-4xl font-extrabold text-[#0052FF] dark:text-blue-400">
                 {formatCurrency(product.price)}
               </span>
             </div>
@@ -246,7 +246,7 @@ export default function ProductDetailPage() {
                     ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed shadow-none"
                     : justAdded
                     ? "bg-emerald-600 text-white shadow-emerald-600/20"
-                    : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/25"
+                    : "bg-[#0052FF] hover:bg-[#0045D8] text-white shadow-blue-500/25"
                 }`}
               >
                 {justAdded ? (

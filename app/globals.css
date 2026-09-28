@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fcfcfd;
-  --foreground: #09090b;
+  --background: #f4f7fc;
+  --foreground: #0f172a;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --tech-blue: #0052ff;
+  --tech-blue-hover: #0045d8;
+  --tech-blue-light: #eef4ff;
+  --tech-cyan: #0284c7;
+  --tech-emerald: #059669;
+  --tech-emerald-bg: #ecfdf5;
 }
 
 @theme inline {
@@ -14,8 +22,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #09090b;
-    --foreground: #fafafa;
+    --background: #0b0f19;
+    --foreground: #f1f5f9;
+    --card-bg: #111827;
+    --card-border: #1f2937;
+    --tech-blue-light: #1e293b;
+    --tech-emerald-bg: #064e3b;
   }
 }
 
@@ -34,8 +46,8 @@ body {
 
 /* Custom subtle scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -43,10 +55,23 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(161, 161, 170, 0.3);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(161, 161, 170, 0.5);
+  background: rgba(148, 163, 184, 0.6);
 }
+
+/* Tech Grid & Reticle Utilities */
+.tech-radial-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(0, 82, 255, 0.08) 0%, transparent 70%);
+}
+
+.tech-blueprint-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 82, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 82, 255, 0.04) 1px, transparent 1px);
+}
+

@@ -102,7 +102,7 @@ export default function CartPage() {
           <div className="mt-6">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0052FF] text-white text-xs font-semibold hover:bg-[#0045D8] shadow-md shadow-blue-500/20 transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
               Start Shopping
@@ -218,7 +218,7 @@ export default function CartPage() {
 
               <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-baseline">
                 <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Total Amount</span>
-                <span className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">
+                <span className="text-2xl font-extrabold text-[#0052FF] dark:text-blue-400">
                   {formatCurrency(totalAmount)}
                 </span>
               </div>
@@ -226,7 +226,7 @@ export default function CartPage() {
               <button
                 onClick={() => router.push("/checkout")}
                 disabled={items.length === 0}
-                className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-98 shadow-lg shadow-indigo-600/25 transition-all"
+                className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl text-xs font-bold text-white bg-[#0052FF] hover:bg-[#0045D8] active:scale-98 shadow-lg shadow-blue-500/25 transition-all"
               >
                 <span>Proceed to Checkout</span>
                 <ArrowRight className="w-4 h-4" />

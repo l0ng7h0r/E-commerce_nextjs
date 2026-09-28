@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Logo } from "../public/ddd.jpg"
 import {
-  ShoppingBag,
   ShoppingCart,
   User,
   LogOut,
@@ -14,10 +13,13 @@ import {
   ShieldCheck,
   Menu,
   X,
-  Sparkles,
+  Search,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
+import { Category } from "@/types";
+import { productsApi } from "@/lib/api/products";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -26,9 +28,17 @@ export default function Navbar() {
   const { itemCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const isSeller = hasRole("seller");
   const isAdmin = hasRole("admin");
+
+  useEffect(() => {
+    productsApi.getCategories().then((cats) => {
+      if (Array.isArray(cats)) setCategories(cats);
+    }).catch(() => {});
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -36,129 +46,176 @@ export default function Navbar() {
     router.push("/");
   };
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/80 dark:bg-zinc-950/80 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors">
+    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-[#0E1320]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors shadow-[0_2px_10px_rgba(0,82,255,0.03)]">
+      {/* Primary Top Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
+          
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-blue-50 dark:bg-blue-950/40 p-1 border border-blue-500/20 group-hover:scale-105 transition-transform duration-200">
+              <Image
+                src="/logo.png"
+                alt="LongtechCart Logo"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain"
+                priority
+              />
             </div>
-            <div>
-              <span className="font-bold text-lg tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
-                Longtech<span className="text-indigo-600 dark:text-indigo-400">Cart</span>
+            <div className="flex flex-col">
+              <span className="font-extrabold text-[17px] tracking-tight text-slate-900 dark:text-white flex items-center leading-none">
+                Longtech<span className="text-[#0052FF]">Cart</span>
               </span>
-              <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium block -mt-1 tracking-wider uppercase">
+              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase mt-0.5">
                 Modern E-Commerce
               </span>
             </div>
           </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1">
-            <Link
-              href="/"
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                pathname === "/"
-                  ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50"
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
-              }`}
+          {/* Search Bar connected to Search */}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex-1 max-w-xl hidden md:flex items-center rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 p-1 focus-within:border-[#0052FF] focus-within:ring-2 focus-within:ring-[#0052FF]/15 transition-all"
+          >
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products by name or description..."
+              className="flex-1 bg-transparent px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="text-xs text-slate-400 hover:text-slate-600 px-1.5"
+              >
+                Clear
+              </button>
+            )}
+            <button
+              type="submit"
+              className="bg-[#0052FF] hover:bg-[#0045D8] text-white p-2 rounded-lg ml-1 shadow-sm shadow-blue-500/20 active:scale-95 transition-all"
+              aria-label="Search"
             >
-              Home
-            </Link>
+              <Search className="w-3.5 h-3.5 stroke-[2.5]" />
+            </button>
+          </form>
 
-            {/* Portal Quick Links */}
-            <Link
-              href="/orders"
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                pathname.startsWith("/orders")
-                  ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50"
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
-              }`}
-            >
-              <Package className="w-4 h-4" />
-              My Orders
-            </Link>
-
-            {isSeller && (
+          {/* Navigation & Action Icons */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            
+            {/* Nav links (Desktop) */}
+            <nav className="hidden lg:flex items-center gap-1">
               <Link
-                href="/seller"
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                  pathname.startsWith("/seller")
-                    ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50/50 dark:hover:bg-zinc-800/60"
+                href="/"
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                  pathname === "/"
+                    ? "text-[#0052FF] bg-blue-50 dark:bg-blue-950/50"
+                    : "text-slate-600 dark:text-slate-400 hover:text-[#0052FF] hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
-                <Store className="w-4 h-4 text-amber-500" />
-                Seller Studio
+                Home
               </Link>
-            )}
 
-            {isAdmin && (
               <Link
-                href="/admin"
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                  pathname.startsWith("/admin")
-                    ? "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50/50 dark:hover:bg-zinc-800/60"
+                href="/orders"
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                  pathname.startsWith("/orders")
+                    ? "text-[#0052FF] bg-blue-50 dark:bg-blue-950/50"
+                    : "text-slate-600 dark:text-slate-400 hover:text-[#0052FF] hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
-                <ShieldCheck className="w-4 h-4 text-rose-500" />
-                Admin Center
+                <Package className="w-3.5 h-3.5" />
+                <span>My Orders</span>
               </Link>
-            )}
-          </nav>
 
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-3">
-            {/* Cart Icon */}
+              {isSeller && (
+                <Link
+                  href="/seller"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 ${
+                    pathname.startsWith("/seller")
+                      ? "text-amber-600 bg-amber-50 dark:bg-amber-950/50"
+                      : "text-amber-600 dark:text-amber-400 hover:bg-amber-50/70"
+                  }`}
+                >
+                  <Store className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Seller Studio</span>
+                </Link>
+              )}
+
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 ${
+                    pathname.startsWith("/admin")
+                      ? "text-[#0052FF] bg-blue-50 dark:bg-blue-950/50"
+                      : "text-[#0052FF] dark:text-blue-400 hover:bg-blue-50/70"
+                  }`}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#0052FF]" />
+                  <span>Admin Center</span>
+                </Link>
+              )}
+            </nav>
+
+            {/* Cart Icon with real count */}
             <Link
               href="/cart"
-              className="relative p-2.5 rounded-xl text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="relative p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-[#0052FF] transition-colors"
               aria-label="Shopping Cart"
             >
-              <ShoppingCart className="w-5 h-5" />
+              <ShoppingCart className="w-4.5 h-4.5" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-pink-500 px-1 text-[11px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-zinc-950 animate-in zoom-in">
+                <span className="absolute -top-1 -right-1 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#0052FF] px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900 animate-in zoom-in">
                   {itemCount > 99 ? "99+" : itemCount}
                 </span>
               )}
             </Link>
 
-            {/* Auth Menu */}
+            {/* Auth Dropdown or Sign In Button */}
             {user ? (
               <div className="relative">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
+                  className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200/70 dark:border-slate-800"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold uppercase">
+                  <div className="w-7 h-7 rounded-lg bg-[#0052FF] flex items-center justify-center text-white text-[11px] font-bold uppercase shadow-sm shadow-blue-500/20">
                     {user.email.substring(0, 2)}
                   </div>
-                  <span className="hidden sm:inline-block text-xs font-medium text-zinc-800 dark:text-zinc-200 max-w-[120px] truncate">
-                    {user.email}
+                  <span className="hidden sm:inline-block text-xs font-semibold text-slate-800 dark:text-slate-200 max-w-[120px] truncate">
+                    {user.email.split("@")[0]}
                   </span>
                 </button>
 
-                {/* Dropdown Menu */}
                 {userDropdownOpen && (
                   <>
                     <div
                       className="fixed inset-0 z-40"
                       onClick={() => setUserDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-zinc-900 shadow-xl border border-zinc-200 dark:border-zinc-800 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                      <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
-                        <p className="text-xs text-zinc-400 font-medium">Signed in as</p>
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                    <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-800 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                      <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800">
+                        <p className="text-[10px] text-slate-400 font-medium">Signed in as</p>
+                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
                           {user.email}
                         </p>
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {user.roles?.map((r) => (
                             <span
                               key={r}
-                              className="px-1.5 py-0.5 rounded text-[10px] font-medium uppercase bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50"
+                              className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-blue-50 text-[#0052FF] dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60"
                             >
                               {r}
                             </span>
@@ -170,18 +227,18 @@ export default function Navbar() {
                         <Link
                           href="/orders"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
-                          <Package className="w-4 h-4 text-zinc-400" />
+                          <Package className="w-3.5 h-3.5 text-slate-400" />
                           Order History
                         </Link>
                         {isSeller && (
                           <Link
                             href="/seller"
                             onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                            className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-amber-600 hover:bg-amber-50 transition-colors"
                           >
-                            <Store className="w-4 h-4 text-amber-500" />
+                            <Store className="w-3.5 h-3.5 text-amber-500" />
                             Seller Studio
                           </Link>
                         )}
@@ -189,20 +246,20 @@ export default function Navbar() {
                           <Link
                             href="/admin"
                             onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                            className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-[#0052FF] hover:bg-blue-50 transition-colors"
                           >
-                            <ShieldCheck className="w-4 h-4 text-rose-500" />
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#0052FF]" />
                             Admin Center
                           </Link>
                         )}
                       </div>
 
-                      <div className="border-t border-zinc-100 dark:border-zinc-800 pt-1">
+                      <div className="border-t border-slate-100 dark:border-slate-800 pt-1">
                         <button
                           onClick={handleLogout}
-                          className="flex w-full items-center gap-2.5 px-3 py-2 text-sm rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                          className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                         >
-                          <LogOut className="w-4 h-4" />
+                          <LogOut className="w-3.5 h-3.5" />
                           Sign Out
                         </button>
                       </div>
@@ -211,21 +268,19 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20 transition-all"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Sign In</span>
-                </Link>
-              </div>
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-[#0052FF] hover:bg-[#0045D8] active:scale-95 shadow-sm shadow-blue-500/25 transition-all"
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </Link>
             )}
 
-            {/* Mobile Hamburger Toggle */}
+            {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className="lg:hidden p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -233,45 +288,87 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Categories Bar loaded directly from API */}
+      {categories.length > 0 && (
+        <div className="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/50 hidden md:block">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-9 text-xs">
+              <nav className="flex items-center gap-5 font-medium text-slate-600 dark:text-slate-300 overflow-x-auto scrollbar-none py-1">
+                <Link href="/" className="font-bold text-[#0052FF] hover:underline shrink-0">
+                  All Products
+                </Link>
+                {categories.slice(0, 7).map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/?cat=${cat.id}`}
+                    className="hover:text-[#0052FF] transition-colors shrink-0"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 font-medium uppercase tracking-wider shrink-0">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#0052FF]" />
+                <span>100% Genuine Guaranteed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl px-4 py-4 space-y-2 animate-in slide-in-from-top duration-200">
-          <Link
-            href="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-          >
-            <Sparkles className="w-4 h-4 text-indigo-500" />
-            Home
-          </Link>
-          <Link
-            href="/orders"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-          >
-            <Package className="w-4 h-4 text-indigo-500" />
-            My Orders
-          </Link>
-          {isSeller && (
+        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-4 space-y-3 animate-in slide-in-from-top duration-200">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products..."
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-[#0052FF] text-slate-900 dark:text-slate-100"
+            />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          </form>
+
+          <div className="space-y-1 pt-1">
             <Link
-              href="/seller"
+              href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-200 hover:bg-blue-50 hover:text-[#0052FF]"
             >
-              <Store className="w-4 h-4" />
-              Seller Studio
+              <Zap className="w-4 h-4 text-[#0052FF]" />
+              Storefront
             </Link>
-          )}
-          {isAdmin && (
             <Link
-              href="/admin"
+              href="/orders"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-200 hover:bg-blue-50 hover:text-[#0052FF]"
             >
-              <ShieldCheck className="w-4 h-4" />
-              Admin Center
+              <Package className="w-4 h-4 text-[#0052FF]" />
+              My Orders
             </Link>
-          )}
+            {isSeller && (
+              <Link
+                href="/seller"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-amber-600 hover:bg-amber-50"
+              >
+                <Store className="w-4 h-4" />
+                Seller Studio
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-[#0052FF] hover:bg-blue-50"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Admin Center
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </header>

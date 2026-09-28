@@ -158,7 +158,7 @@ export default function OrdersPage() {
           <div className="mt-6">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0052FF] text-white text-xs font-semibold hover:bg-[#0045D8] shadow-md shadow-blue-500/20 transition-all"
             >
               <span>Explore Products</span>
               <ArrowRight className="w-4 h-4" />

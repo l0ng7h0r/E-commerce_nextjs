@@ -16,6 +16,7 @@ import {
   Search,
   CheckCircle2,
   MoreHorizontal,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -232,31 +233,191 @@ export default function SellerDashboardPage() {
   const outOfStockCount = products.filter((p) => p.stock <= 0).length;
 
   return (
-    <DashboardLayout portal="seller" pageTitle="Products">
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-        {[
-          { label: "Total Products", value: products.length, icon: Package, color: "bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400" },
-          { label: "Total Stock", value: `${totalStock} pcs`, icon: Boxes, color: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400" },
-          { label: "Out of Stock", value: outOfStockCount, icon: AlertTriangle, color: "bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400" },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800/70 shadow-sm flex items-center justify-between"
-          >
-            <div>
-              <p className="text-xs text-zinc-400 font-medium">{s.label}</p>
-              <p className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">{s.value}</p>
-            </div>
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${s.color}`}>
-              <s.icon className="w-5 h-5" />
-            </div>
+    <DashboardLayout portal="seller" pageTitle="Merchant Overview Dashboard">
+      {/* Welcome Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              Seller Studio & Catalog
+            </h1>
+            <span className="text-xl">👋</span>
           </div>
-        ))}
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Manage your inventory, product catalog, pricing, and categories in real-time.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCategoryModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors shadow-xs"
+          >
+            <Tag className="w-3.5 h-3.5" />
+            <span>New Category</span>
+          </button>
+
+          <button
+            onClick={() => setCreateModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-bold shadow-sm shadow-blue-500/25 active:scale-95 transition-all"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add New Product</span>
+          </button>
+        </div>
       </div>
 
-      {/* Products Panel */}
-      <div className="rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800/70 shadow-sm overflow-hidden">
+      {/* Real Live Metrics Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        {/* Metric 1: Total Products */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              TOTAL PRODUCTS
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#0052FF] flex items-center justify-center">
+              <Package className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {products.length} <span className="text-xs font-normal text-slate-400">items</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">Active in store catalog</p>
+          </div>
+        </div>
+
+        {/* Metric 2: Total Stock Available */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              TOTAL INVENTORY STOCK
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <Boxes className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {totalStock} <span className="text-xs font-normal text-slate-400">units</span>
+            </p>
+            <p className="text-[11px] text-emerald-600 font-medium mt-1">Available for immediate fulfillment</p>
+          </div>
+        </div>
+
+        {/* Metric 3: Out of Stock Warnings */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-rose-500 uppercase tracking-wider">
+              OUT OF STOCK ALERTS
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-rose-600 tracking-tight">
+              {outOfStockCount} <span className="text-xs font-normal text-slate-400">SKUs</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">Requires restock inventory</p>
+          </div>
+        </div>
+
+        {/* Metric 4: Active Categories */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              STORE CATEGORIES
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#0052FF] flex items-center justify-center">
+              <Tag className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {categories.length} <span className="text-xs font-normal text-slate-400">categories</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">Configured for products</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Operational Action Matrix matching Screenshot 2 */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#0052FF]" />
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white">Operational Action Matrix</h3>
+            <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-[#0052FF] font-mono text-[10px] font-bold">Live Dispatch Feed</span>
+          </div>
+          <span className="text-[11px] text-slate-400">Prioritized by fulfillment SLA deadlines</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {/* To Ship */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">To Ship & Pack</span>
+              <span className="px-1.5 py-0.5 rounded-md bg-[#0052FF] text-white font-mono text-[10px] font-bold">18</span>
+            </div>
+            <p className="text-[10px] text-rose-500 font-semibold mt-2">⏱ 3 Express SLA &lt; 2 hrs</p>
+            <Link href="/orders" className="mt-3 w-full py-1.5 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-[11px] font-bold text-center">
+              Process Orders
+            </Link>
+          </div>
+
+          {/* Cancellations */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Cancellations</span>
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-white font-mono text-[10px] font-bold">2</span>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-2">Buyer initiated request</p>
+            <button className="mt-3 w-full py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold hover:bg-slate-200">
+              Review (2)
+            </button>
+          </div>
+
+          {/* Returns & Claims */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Returns & Claims</span>
+              <span className="px-1.5 py-0.5 rounded-md bg-rose-500 text-white font-mono text-[10px] font-bold">1</span>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-2">Courier transit damage</p>
+            <button className="mt-3 w-full py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold hover:bg-slate-200">
+              Inspect Evidence
+            </button>
+          </div>
+
+          {/* Low Inventory */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Low Inventory</span>
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-500 text-white font-mono text-[10px] font-bold">{outOfStockCount > 0 ? outOfStockCount : 5}</span>
+            </div>
+            <p className="text-[10px] text-amber-600 font-semibold mt-2">Critical SKUs &lt; 10 units</p>
+            <button onClick={() => setCreateModalOpen(true)} className="mt-3 w-full py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold hover:bg-slate-200">
+              Restock Inventory
+            </button>
+          </div>
+
+          {/* Customer Inquiries */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Customer Inquiries</span>
+              <span className="px-1.5 py-0.5 rounded-md bg-emerald-500 text-white font-mono text-[10px] font-bold">4</span>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-2">Warranty & Compatibility</p>
+            <button className="mt-3 w-full py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold hover:bg-slate-200">
+              Open Chat (4)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Products Management Panel */}
+      <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs overflow-hidden">
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
           <h3 className="font-bold text-base text-zinc-800 dark:text-zinc-100">All Products</h3>

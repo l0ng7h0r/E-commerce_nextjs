@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NovaCart - Modern E-Commerce Platform",
-  description: "High-performance E-Commerce platform powered by Next.js and Go Fiber v3",
+  title: "LongtechCart - Next-Gen Tech Marketplace & Governance",
+  description: "High-performance Tech E-Commerce platform and merchant portal powered by Next.js and Go Fiber v3",
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+      <body className="min-h-screen flex flex-col bg-[#F4F7FC] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white">
         <ToastProvider>
           <AuthProvider>
             <CartProvider>

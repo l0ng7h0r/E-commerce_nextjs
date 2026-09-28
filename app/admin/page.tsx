@@ -178,39 +178,127 @@ export default function AdminDashboardPage() {
   ] as const;
 
   return (
-    <DashboardLayout portal="admin" pageTitle="Admin Dashboard">
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-        {[
-          { label: "Total Revenue", value: formatCurrency(totalRevenue), icon: DollarSign, color: "bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400" },
-          { label: "Total Orders", value: `${orders.length} orders`, icon: Package, color: "bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400" },
-          { label: "Pending Processing", value: `${pendingOrdersCount} orders`, icon: TrendingUp, color: "bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400" },
-          { label: "Registered Users", value: `${users.length} accounts`, icon: Users, color: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400" },
-        ].map((s) => (
-          <div key={s.label} className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800/70 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs text-zinc-400 font-medium">{s.label}</p>
-              <p className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">{s.value}</p>
-            </div>
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${s.color}`}>
-              <s.icon className="w-5 h-5" />
+    <DashboardLayout portal="admin" pageTitle="Platform Governance & Health">
+      {/* Platform Governance & Health Header matching Screenshot 1 */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              Platform Governance & Health
+            </h1>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>SYSTEMS OPERATIONAL (99.98%)</span>
             </div>
           </div>
-        ))}
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Real-time marketplace telemetry, risk mitigation, and compliance supervision.
+          </p>
+        </div>
+
+        {/* Date Filter & Export audit report */}
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800 text-xs">
+            <button className="px-3 py-1.5 rounded-lg bg-[#0052FF] text-white font-bold shadow-xs">
+              Last 24 Hours
+            </button>
+            <button className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900">
+              Last 7 Days
+            </button>
+            <button className="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:text-slate-900">
+              Month to Date
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Row with Real Computed Data */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        {/* Metric 1: Total Revenue */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Total Platform Revenue
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#0052FF] flex items-center justify-center">
+              <DollarSign className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {formatCurrency(totalRevenue)}
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">From all completed & active orders</p>
+          </div>
+        </div>
+
+        {/* Metric 2: Total Orders */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Total Orders Placed
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#0052FF] flex items-center justify-center">
+              <Package className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {orders.length} <span className="text-xs font-normal text-slate-400">orders</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">Recorded in database</p>
+          </div>
+        </div>
+
+        {/* Metric 3: Pending Orders */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-amber-500 uppercase tracking-wider">
+              Pending Orders
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-amber-600 tracking-tight">
+              {pendingOrdersCount} <span className="text-xs font-normal text-slate-400">pending</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">Awaiting dispatch / payment</p>
+          </div>
+        </div>
+
+        {/* Metric 4: Registered Users */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Registered Accounts
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#0052FF] flex items-center justify-center">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {users.length} <span className="text-xs font-normal text-slate-400">users</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">Buyers, sellers & admins</p>
+          </div>
+        </div>
       </div>
 
       {/* Main Panel */}
-      <div className="rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800/70 shadow-sm overflow-hidden">
+      <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs overflow-hidden">
         {/* Tabs Header */}
-        <div className="flex items-center border-b border-zinc-100 dark:border-zinc-800 px-6 pt-4 gap-1">
+        <div className="flex items-center border-b border-slate-100 dark:border-slate-800 px-6 pt-4 gap-2">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => { setActiveTab(t.key); setCurrentPage(1); }}
               className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
                 activeTab === t.key
-                  ? "border-violet-600 text-violet-600 dark:text-violet-400"
-                  : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                  ? "border-[#0052FF] text-[#0052FF] dark:text-blue-400"
+                  : "border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               <t.icon className="w-4 h-4" />
@@ -220,13 +308,16 @@ export default function AdminDashboardPage() {
 
           {/* Right controls */}
           <div className="ml-auto flex items-center gap-2 pb-2">
-            <button onClick={fetchAdminData} className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            <button
+              onClick={fetchAdminData}
+              className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            >
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             </button>
             {activeTab === "users" && (
               <button
                 onClick={() => setCreateUserModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-md shadow-violet-600/25 transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-bold shadow-sm shadow-blue-500/25 transition-all"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New User</span>
@@ -235,7 +326,7 @@ export default function AdminDashboardPage() {
             {activeTab === "categories" && (
               <button
                 onClick={() => setCreateCategoryModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-md shadow-violet-600/25 transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-bold shadow-sm shadow-blue-500/25 transition-all"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Category</span>

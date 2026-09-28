@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -18,6 +19,13 @@ import {
   ChevronRight,
   ShieldCheck,
   Store,
+  FileCheck2,
+  CheckCircle2,
+  HelpCircle,
+  Activity,
+  Layers,
+  FileText,
+  BadgeCheck,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -27,6 +35,7 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   badge?: number;
+  badgeColor?: "blue" | "red";
 }
 
 interface DashboardLayoutProps {
@@ -39,18 +48,18 @@ interface DashboardLayoutProps {
 
 const SELLER_NAV: NavItem[] = [
   { label: "Dashboard", href: "/seller", icon: LayoutDashboard },
-  { label: "Products", href: "/seller", icon: Package },
-  { label: "Category", href: "/seller?tab=category", icon: Tag },
-  { label: "Orders", href: "/orders", icon: ShoppingCart },
-  { label: "Settings", href: "/seller?tab=settings", icon: Settings },
+  { label: "Products", href: "/seller?tab=products", icon: Package },
+  { label: "Orders & Fulfillment", href: "/orders", icon: ShoppingCart, badge: 18, badgeColor: "blue" },
+  { label: "Category & Brands", href: "/seller?tab=category", icon: Tag },
+  { label: "Store Settings", href: "/seller?tab=settings", icon: Settings },
 ];
 
 const ADMIN_NAV: NavItem[] = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Orders", href: "/admin?tab=orders", icon: ShoppingCart },
-  { label: "Users", href: "/admin?tab=users", icon: Users },
-  { label: "Category", href: "/admin?tab=categories", icon: Tag },
-  { label: "Settings", href: "/admin?tab=settings", icon: Settings },
+  { label: "Platform Overview", href: "/admin", icon: LayoutDashboard },
+  { label: "Seller KYC & Orders", href: "/admin?tab=orders", icon: ShieldCheck, badge: 14, badgeColor: "red" },
+  { label: "User Access & RBAC", href: "/admin?tab=users", icon: Users },
+  { label: "Catalog Moderation", href: "/admin?tab=categories", icon: Tag },
+  { label: "Governance Settings", href: "/admin?tab=settings", icon: Settings },
 ];
 
 export default function DashboardLayout({ children, portal, pageTitle }: DashboardLayoutProps) {
@@ -61,9 +70,7 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navItems = portal === "seller" ? SELLER_NAV : ADMIN_NAV;
-  const accentColor = portal === "seller" ? "#f59e0b" : "#8b5cf6";
-  const brandLabel = portal === "seller" ? "Seller Studio" : "Admin Center";
-  const BrandIcon = portal === "seller" ? Store : ShieldCheck;
+  const brandSub = portal === "seller" ? "SELLER CENTER // MERCHANT PORTAL" : "ADMIN // GOVERNANCE";
 
   const handleLogout = async () => {
     await logout();
@@ -71,38 +78,64 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
     router.push("/login");
   };
 
-  const userInitial = user?.email?.[0]?.toUpperCase() ?? "U";
+  const userInitial = user?.email?.[0]?.toUpperCase() ?? "A";
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <aside
       className={`${
-        mobile ? "w-full" : "w-60 hidden lg:flex"
-      } flex-col h-full bg-[#1a1a2e] text-white shrink-0 relative z-10`}
+        mobile ? "w-full" : "w-64 hidden lg:flex"
+      } flex-col h-full bg-white dark:bg-[#111726] border-r border-slate-200/90 dark:border-slate-800 shrink-0 relative z-10`}
     >
-      {/* Brand */}
-      <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shrink-0"
-          style={{ background: `linear-gradient(135deg, ${accentColor}cc, ${accentColor})` }}
-        >
-          <BrandIcon className="w-5 h-5 text-white" />
+      {/* Brand Header matching Screenshot 1 & 2 */}
+      <div className="p-5 border-b border-slate-100 dark:border-slate-800/80">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-blue-50 dark:bg-blue-950/40 p-1 border border-blue-500/20 group-hover:scale-105 transition-transform">
+              <Image
+                src="/logo.png"
+                alt="LongtechCart Logo"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+                priority
+              />
+            </div>
+            <div>
+              <div className="font-extrabold text-sm text-slate-900 dark:text-white leading-none">
+                Longtech<span className="text-[#0052FF]">Cart</span>
+              </div>
+              <div className="font-mono text-[8px] font-bold text-[#0052FF] tracking-tight mt-1 uppercase">
+                {brandSub}
+              </div>
+            </div>
+          </Link>
+
+          {mobile && (
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
-        <div>
-          <p className="font-extrabold text-sm text-white leading-tight">NovaCart</p>
-          <p className="text-[10px] text-white/40 font-medium">{brandLabel}</p>
+
+        {/* Store Active Status Pill */}
+        <div className="mt-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>{portal === "seller" ? "Store Active (Normal Ops)" : "System Active (Normal Ops)"}</span>
         </div>
-        {mobile && (
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto text-white/60 hover:text-white"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
+      </div>
+
+      {/* Operational Modules Section */}
+      <div className="px-5 pt-4 pb-1">
+        <span className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">
+          Operational Modules
+        </span>
       </div>
 
       {/* Nav Items */}
-      <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-1 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href.split("?")[0]));
           const Icon = item.icon;
@@ -111,75 +144,70 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
               key={item.href + item.label}
               href={item.href}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all group relative ${
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 isActive
-                  ? "text-white"
-                  : "text-white/50 hover:text-white hover:bg-white/5"
+                  ? "bg-[#0052FF] text-white shadow-sm shadow-blue-500/25"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100"
               }`}
-              style={isActive ? { background: `${accentColor}22` } : {}}
             >
-              {/* Active indicator line */}
-              {isActive && (
-                <span
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full"
-                  style={{ backgroundColor: accentColor }}
-                />
-              )}
-              <Icon
-                className="w-4.5 h-4.5 shrink-0"
-                style={isActive ? { color: accentColor } : {}}
-              />
-              <span>{item.label}</span>
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{item.label}</span>
+
               {item.badge !== undefined && (
-                <span className="ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-600 text-white">
+                <span
+                  className={`ml-auto px-1.5 py-0.5 rounded-md font-mono text-[10px] font-bold ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : item.badgeColor === "red"
+                      ? "bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400"
+                      : "bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400"
+                  }`}
+                >
                   {item.badge}
                 </span>
-              )}
-              {!isActive && (
-                <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-40 transition-opacity" />
               )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Bottom User */}
-      <div className="px-3 py-4 border-t border-white/10 space-y-1">
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white hover:bg-white/5 transition-all"
-        >
-          <Store className="w-4 h-4" />
-          <span>Go to Storefront</span>
-        </Link>
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Logout</span>
-        </button>
+      {/* Sidebar Footer: Telemetry & SLA Stats (Matching Screenshot 1 & 2) */}
+      <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 space-y-2 bg-slate-50/50 dark:bg-slate-900/30">
+        <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            TELEMETRY PULSE
+          </span>
+          <span className="font-bold text-emerald-600 dark:text-emerald-400">19ms</span>
+        </div>
 
-        {user && (
-          <div className="flex items-center gap-3 px-3 pt-3 mt-1 border-t border-white/10">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
-              style={{ backgroundColor: accentColor }}
-            >
-              {userInitial}
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-white truncate">{user.email}</p>
-              <p className="text-[10px] text-white/40 capitalize">{portal}</p>
-            </div>
-          </div>
-        )}
+        <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
+          <span>SYSTEM SYNC</span>
+          <span className="font-bold text-slate-700 dark:text-slate-300">99.98%</span>
+        </div>
+
+        <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+          <Link
+            href="/"
+            className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0052FF] flex items-center gap-1"
+          >
+            <Store className="w-3.5 h-3.5" />
+            <span>Storefront</span>
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
     </aside>
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f4f6fa] dark:bg-zinc-950">
+    <div className="flex h-screen overflow-hidden bg-[#F4F7FC] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100">
       {/* Desktop Sidebar */}
       <Sidebar />
 
@@ -187,7 +215,7 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
           <div className="relative w-72 h-full">
@@ -196,63 +224,82 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
         </div>
       )}
 
-      {/* Main area */}
+      {/* Main Content Body */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Topbar */}
-        <header className="h-16 bg-white dark:bg-zinc-900 border-b border-zinc-200/80 dark:border-zinc-800/80 flex items-center gap-4 px-5 shrink-0 shadow-sm">
-          {/* Hamburger (mobile) */}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+        
+        {/* Topbar matching Screenshot 1 & 2 */}
+        <header className="h-16 bg-white dark:bg-[#111726] border-b border-slate-200/90 dark:border-slate-800 flex items-center justify-between px-5 shrink-0 shadow-xs">
+          
+          {/* Left: Mobile Toggle & Breadcrumbs */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
 
-          {/* Page title */}
-          <h2 className="font-bold text-zinc-800 dark:text-zinc-100 text-base hidden sm:block">
-            {pageTitle || brandLabel}
-          </h2>
-
-          {/* Search */}
-          <div className="flex-1 max-w-xs hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
-              <input
-                type="text"
-                placeholder="Search anything..."
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
-              />
+            {/* Breadcrumb path */}
+            <div className="hidden sm:flex items-center gap-2 font-mono text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-bold text-slate-800 dark:text-slate-200">LongtechCart</span>
+              <span>&gt;</span>
+              <span>{portal === "seller" ? "Merchant Portal" : "Governance"}</span>
+              <span>&gt;</span>
+              <span className="text-[#0052FF] font-semibold">{pageTitle || "Overview"}</span>
             </div>
           </div>
 
-          {/* Right controls */}
-          <div className="ml-auto flex items-center gap-3">
-            <button className="relative p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors">
-              <Bell className="w-5 h-5" />
+          {/* Center: Search with ⌘K Badge */}
+          <div className="hidden md:flex items-center max-w-sm flex-1 mx-6">
+            <div className="relative w-full">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder={portal === "seller" ? "Search orders, SKU, customer inquiries..." : "Search entities, tx, merchants..."}
+                className="w-full pl-8 pr-12 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-[#0052FF]"
+              />
+              <span className="absolute right-2.5 top-2 font-mono text-[10px] text-slate-400 border border-slate-200 dark:border-slate-700 rounded px-1">
+                ⌘K
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Status Pills & Impersonation Badge */}
+          <div className="flex items-center gap-3">
+            
+            {/* Systems Status Mint Pill */}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 font-mono text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span>{portal === "seller" ? "Store Active (Normal Ops)" : "PRODUCTION (v3.4.2)"}</span>
+            </div>
+
+            {/* Notification */}
+            <button className="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+              <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
             </button>
 
+            {/* Real User Profile Badge */}
             {user && (
-              <div className="flex items-center gap-2 pl-3 border-l border-zinc-200 dark:border-zinc-800">
-                <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-                  style={{ backgroundColor: accentColor }}
-                >
-                  {userInitial}
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 max-w-[120px] truncate">
-                    {user.email}
+              <div className="flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800">
+                <div className="text-right hidden md:block leading-tight">
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">
+                    {user.email.split("@")[0]}
                   </p>
-                  <p className="text-[10px] text-zinc-400 capitalize">@{portal}</p>
+                  <p className="font-mono text-[9px] text-slate-400 uppercase">
+                    {user.roles?.[0] || portal} Portal
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-xl bg-[#0052FF] flex items-center justify-center text-white font-bold text-xs shadow-sm shadow-blue-500/20">
+                  {userInitial}
                 </div>
               </div>
             )}
           </div>
         </header>
 
-        {/* Scrollable page content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* Page Content Scroll Area */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </main>
       </div>

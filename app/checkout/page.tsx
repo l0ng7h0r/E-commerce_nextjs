@@ -205,13 +205,13 @@ export default function CheckoutPage() {
             </div>
 
             {/* Payment Method Notice */}
-            <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-start gap-3.5">
-              <CreditCard className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 flex items-start gap-3.5">
+              <CreditCard className="w-5 h-5 text-[#0052FF] dark:text-blue-400 shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-xs text-indigo-900 dark:text-indigo-200">
+                <p className="font-semibold text-xs text-blue-900 dark:text-blue-200">
                   Pay with Phajay Payment Gateway
                 </p>
-                <p className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 mt-0.5 leading-relaxed">
+                <p className="text-[11px] text-blue-700/80 dark:text-blue-300/80 mt-0.5 leading-relaxed">
                   A Phajay payment session will be generated automatically when you confirm your order.
                   Supports QR Code and Credit/Debit cards.
                 </p>
@@ -221,7 +221,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-bold text-sm shadow-xl shadow-indigo-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="w-full py-4 px-6 rounded-2xl bg-[#0052FF] hover:bg-[#0045D8] active:scale-98 text-white font-bold text-sm shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

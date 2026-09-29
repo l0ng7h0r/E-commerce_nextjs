@@ -103,6 +103,25 @@ export interface PaymentResponse {
   payment_url: string;
 }
 
+export interface QRCodeResponse {
+  payment_id: string;
+  order_id: string;
+  amount: number;
+  status: string;
+  transaction_id: string;
+  qr_code: string;
+  deep_link?: string;
+}
+
+export interface PaymentStatusResponse {
+  payment_id: string;
+  order_id: string;
+  amount: number;
+  status: string;
+  transaction_id?: string;
+  qr_code?: string;
+}
+
 export interface ApiError {
   error?: string;
   message?: string;

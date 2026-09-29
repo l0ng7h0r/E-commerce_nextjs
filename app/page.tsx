@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { Suspense, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Search,
@@ -14,7 +14,7 @@ import { Product, Category } from "@/types";
 import { productsApi } from "@/lib/api/products";
 import ProductCard from "@/components/ProductCard";
 
-export default function HomePage() {
+function HomePageContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("cat") || "all";
   const initialQuery = searchParams.get("q") || "";
@@ -264,5 +264,13 @@ export default function HomePage() {
       </section>
 
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-20 text-center text-sm text-zinc-500">Loading...</div>}>
+      <HomePageContent />
+    </Suspense>
   );
 }

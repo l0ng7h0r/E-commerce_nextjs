@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   PackageCheck,
   ExternalLink,
+  QrCode,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -22,6 +23,7 @@ import { ordersApi, CreateOrderInput } from "@/lib/api/orders";
 import { paymentsApi } from "@/lib/api/payments";
 import { formatCurrency } from "@/lib/utils";
 import Modal from "@/components/Modal";
+import QRPaymentModal from "@/components/QRPaymentModal";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -36,10 +38,12 @@ export default function CheckoutPage() {
     district: "",
   });
 
+  const [paymentMethod, setPaymentMethod] = useState<"qr" | "link">("qr");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<any | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
 
   if (!user) {
     return (
@@ -84,7 +88,7 @@ export default function CheckoutPage() {
       const order = await ordersApi.createOrder(formData);
       setCreatedOrder(order);
 
-      // 2. Automatically generate Phajay payment session
+      // Preload legacy payment url in background if needed
       try {
         const payRes = await paymentsApi.createPayment(order.id);
         if (payRes && payRes.payment_url) {
@@ -96,7 +100,12 @@ export default function CheckoutPage() {
 
       await refreshCart();
       success("Order created successfully!");
-      setShowSuccessModal(true);
+
+      if (paymentMethod === "qr") {
+        setShowQRModal(true);
+      } else {
+        setShowSuccessModal(true);
+      }
     } catch (err: any) {
       error(err?.message || "Failed to create order. Please try again.");
     } finally {
@@ -204,17 +213,58 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Payment Method Notice */}
-            <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 flex items-start gap-3.5">
-              <CreditCard className="w-5 h-5 text-[#0052FF] dark:text-blue-400 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-xs text-blue-900 dark:text-blue-200">
-                  Pay with Phajay Payment Gateway
-                </p>
-                <p className="text-[11px] text-blue-700/80 dark:text-blue-300/80 mt-0.5 leading-relaxed">
-                  A Phajay payment session will be generated automatically when you confirm your order.
-                  Supports QR Code and Credit/Debit cards.
-                </p>
+            {/* Payment Method Selector */}
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Payment Method / วิธีการชำระเงิน
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("qr")}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all flex flex-col justify-between gap-3 ${
+                    paymentMethod === "qr"
+                      ? "border-[#0052FF] bg-blue-50/50 dark:bg-blue-950/40 shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="w-5 h-5 text-[#0052FF]" />
+                      <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                        Scan QR Code
+                      </span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0052FF] text-white">
+                      Recommended
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-snug">
+                    สแกน QR จ่ายผ่านแอปธนาคาร BCEL One, JDB, LDB, STB, M-Money ได้ทันทีบนเว็บนี้
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("link")}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all flex flex-col justify-between gap-3 ${
+                    paymentMethod === "link"
+                      ? "border-[#0052FF] bg-blue-50/50 dark:bg-blue-950/40 shadow-sm"
+                      : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-5 h-5 text-indigo-600" />
+                      <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                        Phajay Gateway Link
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-snug">
+                    เปิดลิงก์ไปยังหน้า Phajay Payment Gateway ภายนอกเพื่อชำระเงิน
+                  </p>
+                </button>
               </div>
             </div>
 
@@ -332,19 +382,47 @@ export default function CheckoutPage() {
             </p>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-2 pt-2">
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                setShowQRModal(true);
+              }}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all"
+            >
+              <QrCode className="w-4 h-4" />
+              <span>สแกน QR Code จ่ายทันที (Direct QR)</span>
+            </button>
             <button
               onClick={() => {
                 setShowSuccessModal(false);
                 router.push("/orders");
               }}
-              className="w-full py-2.5 px-4 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold hover:opacity-90 transition-opacity"
+              className="w-full py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-bold transition-colors"
             >
-              View Order History
+              ดูประวัติคำสั่งซื้อ
             </button>
           </div>
         </div>
       </Modal>
+
+      {/* Direct In-App QR Payment Modal */}
+      {createdOrder && (
+        <QRPaymentModal
+          isOpen={showQRModal}
+          onClose={() => {
+            setShowQRModal(false);
+            router.push("/orders");
+          }}
+          orderId={createdOrder.id}
+          orderAmount={createdOrder.total_amount || totalAmount}
+          onPaymentSuccess={() => {
+            success("ชำระเงินสำเร็จแล้ว!");
+            setShowQRModal(false);
+            router.push("/orders");
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
   ArrowRight,
   PackageOpen,
   MapPin,
+  QrCode,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -22,6 +23,7 @@ import { ordersApi } from "@/lib/api/orders";
 import { paymentsApi } from "@/lib/api/payments";
 import { formatCurrency, formatDate, getStatusBadgeClass } from "@/lib/utils";
 import Modal from "@/components/Modal";
+import QRPaymentModal from "@/components/QRPaymentModal";
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -29,7 +31,11 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Payment modal state
+  // Direct QR modal state
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrOrder, setQrOrder] = useState<Order | null>(null);
+
+  // Legacy Payment modal state
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
@@ -52,6 +58,11 @@ export default function OrdersPage() {
   useEffect(() => {
     fetchOrders();
   }, [user]);
+
+  const handlePayWithQR = (order: Order) => {
+    setQrOrder(order);
+    setQrModalOpen(true);
+  };
 
   const handlePayNow = async (order: Order) => {
     setSelectedOrder(order);
@@ -206,13 +217,23 @@ export default function OrdersPage() {
                     </div>
 
                     {isPending && (
-                      <button
-                        onClick={() => handlePayNow(order)}
-                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 flex items-center gap-1.5 transition-all"
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        <span>Pay with Phajay</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handlePayWithQR(order)}
+                          className="px-3.5 py-2 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-bold shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all"
+                        >
+                          <QrCode className="w-4 h-4" />
+                          <span>สแกน QR</span>
+                        </button>
+                        <button
+                          onClick={() => handlePayNow(order)}
+                          className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                          title="เปิดลิงก์ Phajay Payment Gateway"
+                        >
+                          <CreditCard className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Gateway</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -360,6 +381,26 @@ export default function OrdersPage() {
           )}
         </div>
       </Modal>
+
+      {/* Direct In-App QR Payment Modal */}
+      {qrOrder && (
+        <QRPaymentModal
+          isOpen={qrModalOpen}
+          onClose={() => {
+            setQrModalOpen(false);
+            setQrOrder(null);
+            fetchOrders();
+          }}
+          orderId={qrOrder.id}
+          orderAmount={qrOrder.total_amount}
+          onPaymentSuccess={() => {
+            success("ชำระเงินสำเร็จแล้ว!");
+            setQrModalOpen(false);
+            setQrOrder(null);
+            fetchOrders();
+          }}
+        />
+      )}
     </div>
   );
 }

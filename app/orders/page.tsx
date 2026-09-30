@@ -15,6 +15,8 @@ import {
   PackageOpen,
   MapPin,
   QrCode,
+  Clock,
+  XCircle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -25,11 +27,75 @@ import { formatCurrency, formatDate, getStatusBadgeClass } from "@/lib/utils";
 import Modal from "@/components/Modal";
 import QRPaymentModal from "@/components/QRPaymentModal";
 
+function PendingOrderTimer({
+  createdAt,
+  onExpire,
+}: {
+  createdAt: string;
+  onExpire: () => void;
+}) {
+  const [timeLeft, setTimeLeft] = useState<{ formatted: string; isExpired: boolean; isWarning: boolean }>({
+    formatted: "",
+    isExpired: false,
+    isWarning: false,
+  });
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const created = new Date(createdAt).getTime();
+      const expiresAt = created + 15 * 60 * 1000; // 15-minute expiration
+      const diff = Math.max(0, expiresAt - Date.now());
+
+      if (diff <= 0) {
+        setTimeLeft({ formatted: "00:00", isExpired: true, isWarning: true });
+        onExpire();
+        return;
+      }
+
+      const totalSec = Math.floor(diff / 1000);
+      const mm = String(Math.floor(totalSec / 60)).padStart(2, "0");
+      const ss = String(totalSec % 60).padStart(2, "0");
+
+      setTimeLeft({
+        formatted: `${mm}:${ss}`,
+        isExpired: false,
+        isWarning: totalSec < 3 * 60,
+      });
+    };
+
+    calculateTime();
+    const interval = setInterval(calculateTime, 1000);
+    return () => clearInterval(interval);
+  }, [createdAt, onExpire]);
+
+  if (timeLeft.isExpired) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">
+        <Clock className="w-3 h-3" /> Expired
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium border ${
+        timeLeft.isWarning
+          ? "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 animate-pulse"
+          : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+      }`}
+    >
+      <Clock className="w-3 h-3" />
+      Pay within {timeLeft.formatted}
+    </span>
+  );
+}
+
 export default function OrdersPage() {
   const { user } = useAuth();
   const { success, error } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCancellingId, setIsCancellingId] = useState<string | null>(null);
 
   // Direct QR modal state
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -52,6 +118,23 @@ export default function OrdersPage() {
       error(err?.message || "Failed to load order history");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!window.confirm("Are you sure you want to cancel this order? The reserved items will be returned to stock.")) {
+      return;
+    }
+
+    try {
+      setIsCancellingId(orderId);
+      await ordersApi.cancelOrder(orderId);
+      success("Order cancelled and stock restored to inventory.");
+      await fetchOrders();
+    } catch (err: any) {
+      error(err?.message || "Failed to cancel order");
+    } finally {
+      setIsCancellingId(null);
     }
   };
 
@@ -190,7 +273,7 @@ export default function OrdersPage() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-100 dark:border-zinc-800 gap-3">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="font-mono font-bold text-sm text-zinc-900 dark:text-zinc-100">
                         #{order.id.substring(0, 8)}
                       </span>
@@ -201,6 +284,12 @@ export default function OrdersPage() {
                       >
                         {order.status.toUpperCase()}
                       </span>
+                      {isPending && (
+                        <PendingOrderTimer
+                          createdAt={order.created_at}
+                          onExpire={fetchOrders}
+                        />
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-zinc-400">
                       <Calendar className="w-3.5 h-3.5" />
@@ -217,21 +306,30 @@ export default function OrdersPage() {
                     </div>
 
                     {isPending && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap justify-end">
                         <button
                           onClick={() => handlePayWithQR(order)}
                           className="px-3.5 py-2 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-bold shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all"
                         >
                           <QrCode className="w-4 h-4" />
-                          <span>สแกน QR</span>
+                          <span>Scan QR</span>
                         </button>
                         <button
                           onClick={() => handlePayNow(order)}
                           className="px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
-                          title="เปิดลิงก์ Phajay Payment Gateway"
+                          title="Payment Link"
                         >
                           <CreditCard className="w-3.5 h-3.5" />
                           <span className="hidden sm:inline">Gateway</span>
+                        </button>
+                        <button
+                          onClick={() => handleCancelOrder(order.id)}
+                          disabled={isCancellingId === order.id}
+                          className="px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50"
+                          title="Cancel Order & Release Stock"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>{isCancellingId === order.id ? "Cancelling..." : "Cancel"}</span>
                         </button>
                       </div>
                     )}
@@ -394,7 +492,7 @@ export default function OrdersPage() {
           orderId={qrOrder.id}
           orderAmount={qrOrder.total_amount}
           onPaymentSuccess={() => {
-            success("ชำระเงินสำเร็จแล้ว!");
+            success("Payment successful");
             setQrModalOpen(false);
             setQrOrder(null);
             fetchOrders();

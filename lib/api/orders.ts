@@ -24,4 +24,10 @@ export const ordersApi = {
     apiClient<Order>(`/user/orders/${id}`, {
       method: "GET",
     }),
+
+  cancelOrder: (id: string) =>
+    apiClient<{ message: string }>(`/user/orders/${id}/cancel`, {
+      method: "POST",
+    }),
 };
+

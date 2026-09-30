@@ -33,8 +33,8 @@ export default function CheckoutPage() {
 
   const [formData, setFormData] = useState<CreateOrderInput>({
     phone_number: "",
-    logistic_company: "Kerry Express",
-    logistic_branch: "Main Branch",
+    logistic_company: "HAL Express",
+    logistic_branch: "",
     district: "",
   });
 
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
                 <input
                   type="tel"
                   required
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="LA +856 ..."
                   value={formData.phone_number}
                   onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -174,10 +174,10 @@ export default function CheckoutPage() {
                   onChange={(e) => setFormData({ ...formData, logistic_company: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="Kerry Express">Kerry Express</option>
-                  <option value="Flash Express">Flash Express</option>
-                  <option value="DHL Express">DHL Express</option>
-                  <option value="FedEx">FedEx</option>
+                  <option value="HAL Express">HAL Express</option>
+                  <option value="ANS Express">ANS Express</option>
+                  <option value="Unitel Express">Unitel Express</option>
+                  <option value="Mexay Express">Mexay Express</option>
                 </select>
               </div>
 
@@ -189,7 +189,7 @@ export default function CheckoutPage() {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Main Station or Local Branch"
+                  placeholder="e.g. Vientiane Main Station"
                   value={formData.logistic_branch}
                   onChange={(e) => setFormData({ ...formData, logistic_branch: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -197,15 +197,15 @@ export default function CheckoutPage() {
               </div>
 
               {/* District / Address */}
-              <div className="space-y-1.5 sm:col-span-2">
+              <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-zinc-400" />
-                  Delivery Address & Postal Code <span className="text-rose-500">*</span>
+                  District & Recipient Address <span className="text-rose-500">*</span>
                 </label>
                 <textarea
                   required
                   rows={3}
-                  placeholder="Street address, apartment/unit, city, state and zip code..."
+                  placeholder="District & Recipient Address ..."
                   value={formData.district}
                   onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -216,7 +216,7 @@ export default function CheckoutPage() {
             {/* Payment Method Selector */}
             <div className="space-y-3">
               <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Payment Method / วิธีการชำระเงิน
+                Payment Method
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
@@ -240,7 +240,7 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-500 leading-snug">
-                    สแกน QR จ่ายผ่านแอปธนาคาร BCEL One, JDB, LDB, STB, M-Money ได้ทันทีบนเว็บนี้
+                    Scan QR to pay via banking apps
                   </p>
                 </button>
 
@@ -257,12 +257,12 @@ export default function CheckoutPage() {
                     <div className="flex items-center gap-2">
                       <CreditCard className="w-5 h-5 text-indigo-600" />
                       <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
-                        Phajay Gateway Link
+                        Payment Link
                       </span>
                     </div>
                   </div>
                   <p className="text-[11px] text-zinc-500 leading-snug">
-                    เปิดลิงก์ไปยังหน้า Phajay Payment Gateway ภายนอกเพื่อชำระเงิน
+                    Open the link to Payment Gateway to pay
                   </p>
                 </button>
               </div>

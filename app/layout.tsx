@@ -5,6 +5,7 @@ import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import ConditionalShell from "@/components/ConditionalShell";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,12 +31,23 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-screen flex flex-col bg-[#F4F7FC] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white">
+      {/* Blocking script: apply dark class before React hydrates to prevent FOUC */}
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else if(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.classList.add('dark')}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className="min-h-screen flex flex-col bg-[#F5F6FF] dark:bg-[#0B0F19] text-[#1A1F6E] dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white">
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
-              <ConditionalShell>{children}</ConditionalShell>
+              <ThemeProvider>
+                <ConditionalShell>{children}</ConditionalShell>
+              </ThemeProvider>
             </CartProvider>
           </AuthProvider>
         </ToastProvider>

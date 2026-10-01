@@ -391,7 +391,7 @@ export default function CheckoutPage() {
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all"
             >
               <QrCode className="w-4 h-4" />
-              <span>สแกน QR Code จ่ายทันที (Direct QR)</span>
+              <span>Scan QR Code to Pay Now</span>
             </button>
             <button
               onClick={() => {
@@ -400,7 +400,7 @@ export default function CheckoutPage() {
               }}
               className="w-full py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-bold transition-colors"
             >
-              ดูประวัติคำสั่งซื้อ
+              View Order History
             </button>
           </div>
         </div>
@@ -417,7 +417,7 @@ export default function CheckoutPage() {
           orderId={createdOrder.id}
           orderAmount={createdOrder.total_amount || totalAmount}
           onPaymentSuccess={() => {
-            success("ชำระเงินสำเร็จแล้ว!");
+            success("Payment successful!");
             setShowQRModal(false);
             router.push("/orders");
           }}

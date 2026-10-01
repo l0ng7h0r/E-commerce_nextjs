@@ -26,6 +26,7 @@ import { paymentsApi } from "@/lib/api/payments";
 import { formatCurrency, formatDate, getStatusBadgeClass } from "@/lib/utils";
 import Modal from "@/components/Modal";
 import QRPaymentModal from "@/components/QRPaymentModal";
+import CancelOrderModal from "@/components/CancelOrderModal";
 
 function PendingOrderTimer({
   createdAt,
@@ -96,6 +97,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCancellingId, setIsCancellingId] = useState<string | null>(null);
+  const [cancelModalOrderId, setCancelModalOrderId] = useState<string | null>(null);
 
   // Direct QR modal state
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -121,14 +123,17 @@ export default function OrdersPage() {
     }
   };
 
-  const handleCancelOrder = async (orderId: string) => {
-    if (!window.confirm("Are you sure you want to cancel this order? The reserved items will be returned to stock.")) {
-      return;
-    }
+  // Opens the cancel confirmation modal
+  const openCancelModal = (orderId: string) => {
+    setCancelModalOrderId(orderId);
+  };
 
+  // Called when user confirms cancellation in the modal (onConfirm emit)
+  const handleCancelOrder = async (orderId: string) => {
     try {
       setIsCancellingId(orderId);
       await ordersApi.cancelOrder(orderId);
+      setCancelModalOrderId(null);
       success("Order cancelled and stock restored to inventory.");
       await fetchOrders();
     } catch (err: any) {
@@ -136,6 +141,12 @@ export default function OrdersPage() {
     } finally {
       setIsCancellingId(null);
     }
+  };
+
+  // Called when user dismisses the modal (onCancel emit)
+  const handleCancelModalDismiss = () => {
+    if (isCancellingId) return; // prevent closing while loading
+    setCancelModalOrderId(null);
   };
 
   useEffect(() => {
@@ -323,7 +334,7 @@ export default function OrdersPage() {
                           <span className="hidden sm:inline">Gateway</span>
                         </button>
                         <button
-                          onClick={() => handleCancelOrder(order.id)}
+                          onClick={() => openCancelModal(order.id)}
                           disabled={isCancellingId === order.id}
                           className="px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50"
                           title="Cancel Order & Release Stock"
@@ -499,6 +510,15 @@ export default function OrdersPage() {
           }}
         />
       )}
+
+      {/* Cancel Order Confirmation Modal (prop & emit) */}
+      <CancelOrderModal
+        isOpen={cancelModalOrderId !== null}
+        orderId={cancelModalOrderId}
+        isLoading={isCancellingId !== null}
+        onConfirm={handleCancelOrder}
+        onCancel={handleCancelModalDismiss}
+      />
     </div>
   );
 }

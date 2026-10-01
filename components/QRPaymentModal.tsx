@@ -155,7 +155,7 @@ export default function QRPaymentModal({
         stopPoll();
         onClose();
       }}
-      title="ชำระเงินด้วย QR Code"
+      title="Payment QR Code"
     >
       <div className="space-y-4 py-1">
         {/* ── Order summary strip ──────────────────────────────── */}
@@ -170,7 +170,7 @@ export default function QRPaymentModal({
         {phase === "bank-select" && (
           <div className="space-y-4">
             <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-              เลือกธนาคาร / ช่องทางชำระเงิน
+              Select Payment Method
             </p>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {BANKS.map((b) => (
@@ -205,7 +205,7 @@ export default function QRPaymentModal({
               onClick={handleGenerateQR}
               className="w-full py-3.5 rounded-2xl bg-[#0052FF] hover:bg-[#0045D8] active:scale-[0.98] text-white font-bold text-sm shadow-xl shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
             >
-              สร้าง QR Code สำหรับ {bank.name}
+              Generate QR Code for {bank.name}
             </button>
           </div>
         )}
@@ -214,7 +214,7 @@ export default function QRPaymentModal({
         {phase === "loading" && (
           <div className="py-12 flex flex-col items-center gap-3 text-zinc-500">
             <Loader2 className="w-10 h-10 animate-spin text-[#0052FF]" />
-            <p className="text-sm font-medium">กำลังสร้าง QR Code...</p>
+            <p className="text-sm font-medium">Generating QR Code...</p>
           </div>
         )}
 
@@ -224,7 +224,7 @@ export default function QRPaymentModal({
             {/* Timer badge */}
             <div className="flex items-center justify-center gap-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
               <Clock className="w-4 h-4" />
-              <span>QR หมดอายุใน {formatted} นาที</span>
+              <span>QR Code expires in {formatted} minutes</span>
               {/* animated progress bar */}
               <div className="flex-1 max-w-[80px] h-1 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
                 <div
@@ -250,17 +250,17 @@ export default function QRPaymentModal({
 
             <div className="text-center space-y-1">
               <p className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                เปิดแอป <span style={{ color: bank.color }}>{bank.name}</span> แล้วสแกน QR นี้
+                Open <span style={{ color: bank.color }}>{bank.name}</span> app and scan this QR code
               </p>
               <p className="text-[11px] text-zinc-400">
-                ระบบจะอัปเดตสถานะโดยอัตโนมัติหลังชำระเงินสำเร็จ
+                The system will automatically update payment status after successful payment
               </p>
             </div>
 
             {/* Polling indicator */}
             <div className="flex items-center justify-center gap-1.5 text-[11px] text-zinc-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
-              กำลังตรวจสอบสถานะการชำระเงิน...
+              Checking payment status...
             </div>
 
             {/* Deep link for mobile */}
@@ -270,7 +270,7 @@ export default function QRPaymentModal({
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-semibold text-zinc-600 dark:text-zinc-300 transition-colors"
               >
                 <Smartphone className="w-4 h-4" />
-                เปิดในแอปมือถือ (Deep Link)
+                Open in Mobile App
               </a>
             )}
           </div>
@@ -283,16 +283,16 @@ export default function QRPaymentModal({
               <CheckCircle2 className="w-12 h-12" />
             </div>
             <div>
-              <h4 className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">ชำระเงินสำเร็จ! 🎉</h4>
+              <h4 className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">Payment Successful! 🎉</h4>
               <p className="text-xs text-zinc-500 mt-1">
-                ขอบคุณที่สั่งซื้อ คำสั่งซื้อของคุณกำลังได้รับการดำเนินการแล้ว
+                Thank you for your order. Your order is now being processed.
               </p>
             </div>
             <button
               onClick={onClose}
               className="px-8 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md shadow-emerald-600/20 transition-all"
             >
-              ดูรายละเอียดคำสั่งซื้อ
+              View Order Details
             </button>
           </div>
         )}
@@ -304,14 +304,14 @@ export default function QRPaymentModal({
               <XCircle className="w-12 h-12" />
             </div>
             <div>
-              <h4 className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">การชำระเงินล้มเหลว</h4>
-              <p className="text-xs text-zinc-500 mt-1">กรุณาลองอีกครั้งหรือเลือกธนาคารอื่น</p>
+              <h4 className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">Payment Failed</h4>
+              <p className="text-xs text-zinc-500 mt-1">Please try again or select another payment method</p>
             </div>
             <button
               onClick={handleRetry}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-sm font-bold shadow-md shadow-blue-500/20 transition-all"
             >
-              <RefreshCw className="w-4 h-4" /> ลองใหม่
+              <RefreshCw className="w-4 h-4" /> Try Again
             </button>
           </div>
         )}
@@ -323,14 +323,14 @@ export default function QRPaymentModal({
               <Clock className="w-12 h-12" />
             </div>
             <div>
-              <h4 className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">QR Code หมดอายุแล้ว</h4>
-              <p className="text-xs text-zinc-500 mt-1">กรุณาสร้าง QR Code ใหม่เพื่อชำระเงิน</p>
+              <h4 className="text-lg font-extrabold text-zinc-900 dark:text-zinc-100">QR Code Expired</h4>
+              <p className="text-xs text-zinc-500 mt-1">Please generate a new QR Code to continue payment</p>
             </div>
             <button
               onClick={handleRetry}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#0052FF] hover:bg-[#0045D8] text-white text-sm font-bold shadow-md shadow-blue-500/20 transition-all"
             >
-              <RefreshCw className="w-4 h-4" /> สร้าง QR ใหม่
+              <RefreshCw className="w-4 h-4" /> Generate New QR
             </button>
           </div>
         )}

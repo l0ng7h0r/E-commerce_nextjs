@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
+/* Tailwind v4: enable class-based dark mode via .dark on <html> */
+@variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #f4f7fc;
-  --foreground: #0f172a;
-  --card-bg: #ffffff;
-  --card-border: #e2e8f0;
+  --background: #F5F6FF;       /* Indigo Cream — lavender-blue tint */
+  --foreground: #1A1F6E;       /* Logo navy — deep indigo */
+  --card-bg: #FFFFFF;
+  --card-border: #DDE1F5;      /* Blue-tinted border */
   --tech-blue: #0052ff;
   --tech-blue-hover: #0045d8;
-  --tech-blue-light: #eef4ff;
+  --tech-blue-light: #EEF0FF;  /* Soft indigo highlight */
   --tech-cyan: #0284c7;
   --tech-emerald: #059669;
   --tech-emerald-bg: #ecfdf5;
+  /* Secondary text */
+  --foreground-muted: #4A5490;
 }
 
 @theme inline {
@@ -20,15 +25,14 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b0f19;
-    --foreground: #f1f5f9;
-    --card-bg: #111827;
-    --card-border: #1f2937;
-    --tech-blue-light: #1e293b;
-    --tech-emerald-bg: #064e3b;
-  }
+/* Dark mode CSS variables — triggered by .dark class on <html> */
+.dark {
+  --background: #0b0f19;
+  --foreground: #f1f5f9;
+  --card-bg: #111827;
+  --card-border: #1f2937;
+  --tech-blue-light: #1e293b;
+  --tech-emerald-bg: #064e3b;
 }
 
 html {

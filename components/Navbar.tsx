@@ -15,9 +15,12 @@ import {
   X,
   Search,
   Zap,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
+import { useTheme } from "@/context/ThemeContext";
 import { Category } from "@/types";
 import { productsApi } from "@/lib/api/products";
 
@@ -26,6 +29,7 @@ export default function Navbar() {
   const router = useRouter();
   const { user, logout, hasRole } = useAuth();
   const { itemCount } = useCart();
+  const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,7 +60,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-[#0E1320]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors shadow-[0_2px_10px_rgba(0,82,255,0.03)]">
+    <header className="sticky top-0 z-40 w-full bg-[#d1dced]/95 dark:bg-[#0E1320]/95 backdrop-blur-md border-b border-[#DDE1F5]/80 dark:border-slate-800 transition-colors shadow-[0_2px_12px_rgba(26,31,110,0.06)]">
       {/* Primary Top Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
@@ -169,6 +173,19 @@ export default function Navbar() {
                 </Link>
               )}
             </nav>
+
+            {/* Dark / Light Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-[#0052FF] dark:hover:text-blue-400 transition-all group relative"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4 transition-transform group-hover:rotate-12 group-hover:scale-110 duration-200" />
+              ) : (
+                <Moon className="w-4 h-4 transition-transform group-hover:-rotate-12 group-hover:scale-110 duration-200" />
+              )}
+            </button>
 
             {/* Cart Icon with real count */}
             <Link

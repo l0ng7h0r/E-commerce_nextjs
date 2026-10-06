@@ -45,12 +45,19 @@ export default function CheckoutPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
 
+  React.useEffect(() => {
+    if (!user) {
+      router.push("/login?redirect=/checkout");
+    }
+  }, [user, router]);
+
   if (!user) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
         <h2 className="text-xl font-bold mb-2">Please sign in before checking out</h2>
-        <Link href="/login" className="text-indigo-600 font-semibold text-sm hover:underline">
-          Sign In
+        <p className="text-xs text-zinc-500 mb-4">Redirecting to sign in portal...</p>
+        <Link href="/login?redirect=/checkout" className="text-indigo-600 font-semibold text-sm hover:underline">
+          Click here if not redirected automatically
         </Link>
       </div>
     );
@@ -165,11 +172,13 @@ export default function CheckoutPage() {
 
               {/* Logistic Company */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <label htmlFor="logistic-company" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                   <Truck className="w-3.5 h-3.5 text-zinc-400" />
                   Courier / Carrier
                 </label>
                 <select
+                  id="logistic-company"
+                  aria-label="Courier / Carrier"
                   value={formData.logistic_company}
                   onChange={(e) => setFormData({ ...formData, logistic_company: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"

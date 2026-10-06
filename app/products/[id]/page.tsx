@@ -20,12 +20,14 @@ import { Product, Category } from "@/types";
 import { productsApi } from "@/lib/api/products";
 import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
+  const id = params?.id as string;
 
+  const { user } = useAuth();
   const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -57,6 +59,10 @@ export default function ProductDetailPage() {
   }, [id]);
 
   const handleAddToCart = async () => {
+    if (!user) {
+      router.push(`/login?redirect=/products/${id}`);
+      return;
+    }
     if (!product || product.stock <= 0) return;
     setIsAdding(true);
     const ok = await addToCart(product.id, quantity);
@@ -68,6 +74,10 @@ export default function ProductDetailPage() {
   };
 
   const handleBuyNow = async () => {
+    if (!user) {
+      router.push(`/login?redirect=/products/${id}`);
+      return;
+    }
     if (!product || product.stock <= 0) return;
     const ok = await addToCart(product.id, quantity);
     if (ok) {
@@ -100,7 +110,7 @@ export default function ProductDetailPage() {
           <PackageOpen className="w-8 h-8" />
         </div>
         <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">Product Not Found</h2>
-        <p className="text-sm text-zinc-500 mb-6">{error || "This product may have been removed or does not exist."}</p>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">{error || "This product may have been removed or does not exist."}</p>
         <Link
           href="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-sm font-semibold hover:opacity-90 transition-opacity"
@@ -119,7 +129,7 @@ export default function ProductDetailPage() {
       {/* Back button */}
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Products
@@ -150,11 +160,11 @@ export default function ProductDetailPage() {
             {/* Stock pill */}
             <div className="absolute top-4 left-4">
               {isOutOfStock ? (
-                <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-rose-500 text-white shadow-md">
+                <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-rose-600 text-white shadow-md">
                   Out of stock
                 </span>
               ) : (
-                <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-md">
+                <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-md">
                   In stock ({product.stock} available)
                 </span>
               )}
@@ -178,25 +188,25 @@ export default function ProductDetailPage() {
 
             {/* Price */}
             <div className="pt-2">
-              <span className="text-xs text-zinc-400 block font-medium">Price</span>
+              <span className="text-xs text-zinc-600 dark:text-zinc-400 block font-medium">Price</span>
               <span className="text-3xl sm:text-4xl font-extrabold text-[#0052FF] dark:text-blue-400">
                 {formatCurrency(product.price)}
               </span>
             </div>
 
             {/* Seller info */}
-            <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 pt-1">
-              <Store className="w-4 h-4 text-zinc-400" />
+            <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400 pt-1">
+              <Store className="w-4 h-4 text-zinc-500" />
               <span>Seller ID:</span>
               <span className="font-mono text-zinc-700 dark:text-zinc-300">{product.seller_id}</span>
             </div>
 
             {/* Description */}
             <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-2">
                 Product Description
-              </h3>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
+              </h2>
+              <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line">
                 {product.description || "No additional description available for this product."}
               </p>
             </div>
@@ -204,30 +214,34 @@ export default function ProductDetailPage() {
             {/* Quantity Selector */}
             {!isOutOfStock && (
               <div className="pt-4">
-                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-2">
+                <label htmlFor="product-qty" className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-2">
                   Quantity
                 </label>
                 <div className="flex items-center gap-3">
                   <div className="inline-flex items-center border border-zinc-300 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 overflow-hidden">
                     <button
+                      type="button"
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       disabled={quantity <= 1}
+                      aria-label="Decrease quantity"
                       className="p-2.5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    <span className="w-12 text-center text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                    <span id="product-qty" aria-live="polite" className="w-12 text-center text-sm font-bold text-zinc-900 dark:text-zinc-100">
                       {quantity}
                     </span>
                     <button
+                      type="button"
                       onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                       disabled={quantity >= product.stock}
+                      aria-label="Increase quantity"
                       className="p-2.5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400">
                     of {product.stock} available
                   </span>
                 </div>
@@ -243,7 +257,7 @@ export default function ProductDetailPage() {
                 disabled={isOutOfStock || isAdding}
                 className={`flex-1 w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl text-sm font-bold shadow-lg transition-all active:scale-98 ${
                   isOutOfStock
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed shadow-none"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed shadow-none"
                     : justAdded
                     ? "bg-emerald-600 text-white shadow-emerald-600/20"
                     : "bg-[#0052FF] hover:bg-[#0045D8] text-white shadow-blue-500/25"
@@ -269,7 +283,7 @@ export default function ProductDetailPage() {
                 disabled={isOutOfStock}
                 className={`flex-1 w-full flex items-center justify-center py-3.5 px-6 rounded-2xl text-sm font-bold border transition-all active:scale-98 ${
                   isOutOfStock
-                    ? "border-zinc-200 dark:border-zinc-800 text-zinc-400 cursor-not-allowed"
+                    ? "border-zinc-200 dark:border-zinc-800 text-zinc-500 cursor-not-allowed"
                     : "border-indigo-600 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50"
                 }`}
               >
@@ -281,15 +295,15 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-3 gap-2 pt-4 text-center">
               <div className="p-3 rounded-xl bg-zinc-100/60 dark:bg-zinc-800/40 text-xs">
                 <Truck className="w-4 h-4 mx-auto text-indigo-500 mb-1" />
-                <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Express Delivery</span>
+                <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300">Express Delivery</span>
               </div>
               <div className="p-3 rounded-xl bg-zinc-100/60 dark:bg-zinc-800/40 text-xs">
                 <ShieldCheck className="w-4 h-4 mx-auto text-emerald-500 mb-1" />
-                <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">100% Authentic</span>
+                <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300">100% Authentic</span>
               </div>
               <div className="p-3 rounded-xl bg-zinc-100/60 dark:bg-zinc-800/40 text-xs">
                 <RotateCcw className="w-4 h-4 mx-auto text-amber-500 mb-1" />
-                <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">7-Day Guarantee</span>
+                <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300">7-Day Guarantee</span>
               </div>
             </div>
           </div>

@@ -41,6 +41,7 @@ export interface CartProduct {
   name: string;
   price: number;
   image_url: string;
+  stock?: number;
 }
 
 export interface CartItem {

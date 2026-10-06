@@ -37,7 +37,12 @@ export default function LoginPage() {
       await loginAs(role, { email, password });
       success(`Signed in successfully as ${role}`);
 
-      if (role === "seller") {
+      const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+      const redirectUrl = searchParams ? searchParams.get("redirect") : null;
+
+      if (redirectUrl && redirectUrl.startsWith("/")) {
+        router.push(redirectUrl);
+      } else if (role === "seller") {
         router.push("/seller");
       } else if (role === "admin") {
         router.push("/admin");

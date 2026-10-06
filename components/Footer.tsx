@@ -15,8 +15,8 @@ export default function Footer() {
                 <Truck className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">Bonded Express Dispatch</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Flash, Kerry, DHL & Thai Post</p>
+                <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">Delivery Services</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">HAL, ANS, MX, Unitel Express & Laos Post</p>
               </div>
             </div>
 
@@ -25,8 +25,8 @@ export default function Footer() {
                 <CreditCard className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">Escrow Protected Checkout</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Phajay Payment Gateway</p>
+                <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">Secure Payments</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">Phajay Payment Gateway</p>
               </div>
             </div>
 
@@ -35,8 +35,8 @@ export default function Footer() {
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">100% Genuine Guaranteed</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Verified Brand Distributors</p>
+                <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">Verified Products</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">Verified Brand Distributors</p>
               </div>
             </div>
 
@@ -46,7 +46,7 @@ export default function Footer() {
               </div>
               <div>
                 <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">24/7 SLA Support</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Real-time technical assistance</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400">Real-time technical assistance</p>
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function Footer() {
                 Longtech<span className="text-[#0052FF]">Cart</span>
               </span>
             </div>
-            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
               Next-generation technical marketplace and merchant governance platform powered by Next.js and Go Fiber REST architecture.
             </p>
           </div>
@@ -96,7 +96,7 @@ export default function Footer() {
 
           <div>
             <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-3">System Architecture</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-2.5">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-2.5">
               Go Fiber v3 RESTful API, PostgreSQL, Supabase Storage & Phajay Gateway.
             </p>
             <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
@@ -106,7 +106,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-5 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div className="mt-10 pt-5 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-400">
           <p>© {new Date().getFullYear()} LongtechCart. All rights reserved.</p>
           <div className="flex items-center gap-4 font-mono text-[11px]">
             <span>Next.js 16</span>

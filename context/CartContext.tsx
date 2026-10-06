@@ -63,7 +63,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = async (productId: string, quantity: number = 1): Promise<boolean> => {
     if (!user) {
-      error("Please login to add items to your cart");
+      error("Please sign in before ordering products");
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname;
+        const redirectParam = currentPath && currentPath !== "/login" ? `?redirect=${encodeURIComponent(currentPath)}` : "";
+        window.location.href = `/login${redirectParam}`;
+      }
       return false;
     }
 

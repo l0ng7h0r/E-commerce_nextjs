@@ -654,8 +654,10 @@ export default function SellerDashboardPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Category</label>
+            <label htmlFor="new-product-category" className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Category</label>
             <select
+              id="new-product-category"
+              aria-label="Product Category"
               value={newProduct.category_id}
               onChange={(e) => setNewProduct({ ...newProduct, category_id: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500"
@@ -740,8 +742,10 @@ export default function SellerDashboardPage() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Category</label>
+              <label htmlFor="edit-product-category" className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Category</label>
               <select
+                id="edit-product-category"
+                aria-label="Edit Product Category"
                 value={editingProduct.category_id || ""}
                 onChange={(e) => setEditingProduct({ ...editingProduct, category_id: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500"

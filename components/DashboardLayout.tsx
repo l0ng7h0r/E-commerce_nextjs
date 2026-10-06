@@ -10,22 +10,14 @@ import {
   Users,
   Tag,
   ShoppingCart,
-  Settings,
   LogOut,
   Menu,
   X,
   Bell,
   Search,
-  ChevronRight,
+  ChevronDown,
   ShieldCheck,
   Store,
-  FileCheck2,
-  CheckCircle2,
-  HelpCircle,
-  Activity,
-  Layers,
-  FileText,
-  BadgeCheck,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -49,17 +41,14 @@ interface DashboardLayoutProps {
 const SELLER_NAV: NavItem[] = [
   { label: "Dashboard", href: "/seller", icon: LayoutDashboard },
   { label: "Products", href: "/seller?tab=products", icon: Package },
-  { label: "Orders & Fulfillment", href: "/orders", icon: ShoppingCart, badge: 18, badgeColor: "blue" },
+  { label: "Orders & Fulfillment", href: "/seller/orders", icon: ShoppingCart, badge: 0, badgeColor: "blue" },
   { label: "Category & Brands", href: "/seller?tab=category", icon: Tag },
-  { label: "Store Settings", href: "/seller?tab=settings", icon: Settings },
 ];
 
 const ADMIN_NAV: NavItem[] = [
-  { label: "Platform Overview", href: "/admin", icon: LayoutDashboard },
-  { label: "Seller KYC & Orders", href: "/admin?tab=orders", icon: ShieldCheck, badge: 14, badgeColor: "red" },
-  { label: "User Access & RBAC", href: "/admin?tab=users", icon: Users },
-  { label: "Catalog Moderation", href: "/admin?tab=categories", icon: Tag },
-  { label: "Governance Settings", href: "/admin?tab=settings", icon: Settings },
+  { label: "User & Seller Management", href: "/admin?tab=users", icon: Users },
+  { label: "Platform Orders (Audit)", href: "/admin?tab=orders", icon: ShieldCheck },
+  { label: "Catalog Categories", href: "/admin?tab=categories", icon: Tag },
 ];
 
 export default function DashboardLayout({ children, portal, pageTitle }: DashboardLayoutProps) {
@@ -68,11 +57,13 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
   const { user, logout } = useAuth();
   const { success } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   const navItems = portal === "seller" ? SELLER_NAV : ADMIN_NAV;
   const brandSub = portal === "seller" ? "SELLER CENTER // MERCHANT PORTAL" : "ADMIN // GOVERNANCE";
 
   const handleLogout = async () => {
+    setProfileDropdownOpen(false);
     await logout();
     success("Signed out successfully");
     router.push("/login");
@@ -86,7 +77,7 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
         mobile ? "w-full" : "w-64 hidden lg:flex"
       } flex-col h-full bg-white dark:bg-[#111726] border-r border-slate-200/90 dark:border-slate-800 shrink-0 relative z-10`}
     >
-      {/* Brand Header matching Screenshot 1 & 2 */}
+      {/* Brand Header */}
       <div className="p-5 border-b border-slate-100 dark:border-slate-800/80">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -171,7 +162,7 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
         })}
       </nav>
 
-      {/* Sidebar Footer: Telemetry & SLA Stats (Matching Screenshot 1 & 2) */}
+      {/* Sidebar Footer: Telemetry Stats */}
       <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 space-y-2 bg-slate-50/50 dark:bg-slate-900/30">
         <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
           <span className="flex items-center gap-1.5">
@@ -186,21 +177,14 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
           <span className="font-bold text-slate-700 dark:text-slate-300">99.98%</span>
         </div>
 
-        <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+        <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800">
           <Link
             href="/"
-            className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0052FF] flex items-center gap-1"
+            className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0052FF] flex items-center gap-1.5 w-full py-1 rounded-lg transition-colors"
           >
             <Store className="w-3.5 h-3.5" />
-            <span>Storefront</span>
+            <span>Visit Storefront</span>
           </Link>
-          <button
-            onClick={handleLogout}
-            className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Logout</span>
-          </button>
         </div>
       </div>
     </aside>
@@ -227,7 +211,7 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
       {/* Main Content Body */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         
-        {/* Topbar matching Screenshot 1 & 2 */}
+        {/* Topbar */}
         <header className="h-16 bg-white dark:bg-[#111726] border-b border-slate-200/90 dark:border-slate-800 flex items-center justify-between px-5 shrink-0 shadow-xs">
           
           {/* Left: Mobile Toggle & Breadcrumbs */}
@@ -249,7 +233,7 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
             </div>
           </div>
 
-          {/* Center: Search with ⌘K Badge */}
+          {/* Center: Search */}
           <div className="hidden md:flex items-center max-w-sm flex-1 mx-6">
             <div className="relative w-full">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -264,13 +248,13 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
             </div>
           </div>
 
-          {/* Right: Status Pills & Impersonation Badge */}
+          {/* Right: Status & Profile */}
           <div className="flex items-center gap-3">
             
-            {/* Systems Status Mint Pill */}
+            {/* Systems Status Pill */}
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 font-mono text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>{portal === "seller" ? "Store Active (Normal Ops)" : "PRODUCTION (v3.4.2)"}</span>
+              <span>{portal === "seller" ? "Store Active" : "PRODUCTION (v3.4.2)"}</span>
             </div>
 
             {/* Notification */}
@@ -279,20 +263,72 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
             </button>
 
-            {/* Real User Profile Badge */}
+            {/* Profile Dropdown */}
             {user && (
-              <div className="flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800">
-                <div className="text-right hidden md:block leading-tight">
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">
-                    {user.email.split("@")[0]}
-                  </p>
-                  <p className="font-mono text-[9px] text-slate-400 uppercase">
-                    {user.roles?.[0] || portal} Portal
-                  </p>
-                </div>
-                <div className="w-8 h-8 rounded-xl bg-[#0052FF] flex items-center justify-center text-white font-bold text-xs shadow-sm shadow-blue-500/20">
-                  {userInitial}
-                </div>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setProfileDropdownOpen((v) => !v)}
+                  className="flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800 hover:opacity-85 transition-opacity focus:outline-none cursor-pointer"
+                  aria-label="User profile menu"
+                >
+                  <div className="text-right hidden md:block leading-tight">
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">
+                      {user.email.split("@")[0]}
+                    </p>
+                    <p className="font-mono text-[9px] text-slate-400 uppercase">
+                      {user.roles?.[0] || portal} Portal
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-xl bg-[#0052FF] flex items-center justify-center text-white font-bold text-xs shadow-sm shadow-blue-500/20">
+                    {userInitial}
+                  </div>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${profileDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {profileDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setProfileDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 top-12 z-40 w-60 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-2 space-y-1">
+                      {/* User Info */}
+                      <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800 mb-1">
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Signed in as</p>
+                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate mt-0.5">{user.email}</p>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {user.roles?.map((r) => (
+                            <span
+                              key={r}
+                              className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-blue-50 text-[#0052FF] dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60"
+                            >
+                              {r}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Link
+                        href="/"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                      >
+                        <Store className="w-4 h-4 text-slate-400" />
+                        <span>Visit Storefront</span>
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors text-left cursor-pointer"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -306,3 +342,4 @@ export default function DashboardLayout({ children, portal, pageTitle }: Dashboa
     </div>
   );
 }
+

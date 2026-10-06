@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { Category, Product } from "@/types";
+import { Category, Order, Product } from "@/types";
 
 export interface CreateProductInput {
   category_id?: string;
@@ -55,5 +55,16 @@ export const sellerApi = {
     apiClient<Category>("/seller/categories", {
       method: "POST",
       body: JSON.stringify({ name }),
+    }),
+
+  getSellerOrders: () =>
+    apiClient<Order[]>("/seller/orders", {
+      method: "GET",
+    }),
+
+  updateOrderStatus: (id: string, status: string) =>
+    apiClient<Order>(`/seller/orders/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
     }),
 };

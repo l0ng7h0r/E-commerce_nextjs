@@ -60,7 +60,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#d1dced]/95 dark:bg-[#0E1320]/95 backdrop-blur-md border-b border-[#DDE1F5]/80 dark:border-slate-800 transition-colors shadow-[0_2px_12px_rgba(26,31,110,0.06)]">
+    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-[#0E1320]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors shadow-[0_2px_12px_rgba(26,31,110,0.06)]">
       {/* Primary Top Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
@@ -81,7 +81,7 @@ export default function Navbar() {
               <span className="font-extrabold text-[17px] tracking-tight text-slate-900 dark:text-white flex items-center leading-none">
                 Longtech<span className="text-[#0052FF]">Cart</span>
               </span>
-              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase mt-0.5">
+              <span className="text-[9px] font-bold text-slate-600 dark:text-slate-400 tracking-wider uppercase mt-0.5">
                 Modern E-Commerce
               </span>
             </div>
@@ -90,6 +90,7 @@ export default function Navbar() {
           {/* Search Bar connected to Search */}
           <form
             onSubmit={handleSearchSubmit}
+            role="search"
             className="flex-1 max-w-xl hidden md:flex items-center rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 p-1 focus-within:border-[#0052FF] focus-within:ring-2 focus-within:ring-[#0052FF]/15 transition-all"
           >
             <input
@@ -97,13 +98,15 @@ export default function Navbar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products by name or description..."
-              className="flex-1 bg-transparent px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
+              aria-label="Search products"
+              className="flex-1 bg-transparent px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="text-xs text-slate-400 hover:text-slate-600 px-1.5"
+                aria-label="Clear search query"
+                className="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 px-1.5"
               >
                 Clear
               </button>
@@ -111,7 +114,7 @@ export default function Navbar() {
             <button
               type="submit"
               className="bg-[#0052FF] hover:bg-[#0045D8] text-white p-2 rounded-lg ml-1 shadow-sm shadow-blue-500/20 active:scale-95 transition-all"
-              aria-label="Search"
+              aria-label="Submit search"
             >
               <Search className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
@@ -206,6 +209,8 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  aria-label="User account menu"
+                  aria-expanded={userDropdownOpen}
                   className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200/70 dark:border-slate-800"
                 >
                   <div className="w-7 h-7 rounded-lg bg-[#0052FF] flex items-center justify-center text-white text-[11px] font-bold uppercase shadow-sm shadow-blue-500/20">
@@ -224,7 +229,7 @@ export default function Navbar() {
                     />
                     <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-800 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                       <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800">
-                        <p className="text-[10px] text-slate-400 font-medium">Signed in as</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Signed in as</p>
                         <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
                           {user.email}
                         </p>
@@ -297,6 +302,8 @@ export default function Navbar() {
             {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
               className="lg:hidden p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -305,16 +312,16 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Categories Bar loaded directly from API */}
-      {categories.length > 0 && (
-        <div className="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/50 hidden md:block">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-9 text-xs">
-              <nav className="flex items-center gap-5 font-medium text-slate-600 dark:text-slate-300 overflow-x-auto scrollbar-none py-1">
-                <Link href="/" className="font-bold text-[#0052FF] hover:underline shrink-0">
-                  All Products
-                </Link>
-                {categories.slice(0, 7).map((cat) => (
+      {/* Categories Bar (Always rendered on md+ to prevent layout shift) */}
+      <div className="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/50 hidden md:block h-9">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-9 text-xs">
+            <nav className="flex items-center gap-5 font-medium text-slate-600 dark:text-slate-300 overflow-x-auto scrollbar-none py-1">
+              <Link href="/" className="font-bold text-[#0052FF] hover:underline shrink-0">
+                All Products
+              </Link>
+              {categories.length > 0 ? (
+                categories.slice(0, 7).map((cat) => (
                   <Link
                     key={cat.id}
                     href={`/?cat=${cat.id}`}
@@ -322,27 +329,34 @@ export default function Navbar() {
                   >
                     {cat.name}
                   </Link>
-                ))}
-              </nav>
+                ))
+              ) : (
+                <div className="flex items-center gap-4 py-1" aria-hidden="true">
+                  <div className="h-3 w-14 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+                  <div className="h-3 w-14 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+                </div>
+              )}
+            </nav>
 
-              <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 font-medium uppercase tracking-wider shrink-0">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#0052FF]" />
-                <span>100% Genuine Guaranteed</span>
-              </div>
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-600 dark:text-slate-400 font-medium uppercase tracking-wider shrink-0">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#0052FF]" />
+              <span>100% Genuine Guaranteed</span>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-4 space-y-3 animate-in slide-in-from-top duration-200">
-          <form onSubmit={handleSearchSubmit} className="relative">
+          <form onSubmit={handleSearchSubmit} role="search" className="relative">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products..."
+              aria-label="Search products"
               className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-[#0052FF] text-slate-900 dark:text-slate-100"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />

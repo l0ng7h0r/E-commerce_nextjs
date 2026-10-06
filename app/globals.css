@@ -6,11 +6,11 @@
 :root {
   --background: #F5F6FF;       /* Indigo Cream — lavender-blue tint */
   --foreground: #1A1F6E;       /* Logo navy — deep indigo */
-  --card-bg: #FFFFFF;
+  --card-bg: #ffffffe5;
   --card-border: #DDE1F5;      /* Blue-tinted border */
   --tech-blue: #0052ff;
   --tech-blue-hover: #0045d8;
-  --tech-blue-light: #EEF0FF;  /* Soft indigo highlight */
+  --tech-blue-light: #eef0ffef;  /* Soft indigo highlight */
   --tech-cyan: #0284c7;
   --tech-emerald: #059669;
   --tech-emerald-bg: #ecfdf5;

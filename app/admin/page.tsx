@@ -28,12 +28,17 @@ export default function AdminDashboardPage() {
   const { user, hasRole } = useAuth();
   const { success, error } = useToast();
 
-  const [activeTab, setActiveTab] = useState<"orders" | "users" | "categories">("orders");
+  const [activeTab, setActiveTab] = useState<"users" | "orders" | "categories">("users");
   const [orders, setOrders] = useState<Order[]>([]);
   const [users, setUsers] = useState<UserType[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // User tab filters
+  const [userSearch, setUserSearch] = useState("");
+  const [userRoleFilter, setUserRoleFilter] = useState<"all" | "seller" | "user" | "admin">("all");
+
+  // Orders tab filters
   const [orderSearch, setOrderSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +51,17 @@ export default function AdminDashboardPage() {
   const [createCategoryModalOpen, setCreateCategoryModalOpen] = useState(false);
   const [newCatName, setNewCatName] = useState("");
   const [isCreatingCat, setIsCreatingCat] = useState(false);
+
+  // Sync tab with URL search parameter if present
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      if (tabParam === "orders" || tabParam === "users" || tabParam === "categories") {
+        setActiveTab(tabParam);
+      }
+    }
+  }, []);
 
   const fetchAdminData = async () => {
     try {
@@ -155,6 +171,22 @@ export default function AdminDashboardPage() {
   const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
   const pendingOrdersCount = orders.filter((o) => o.status === "pending").length;
 
+  const sellerAccounts = users.filter((u) => u.roles?.includes("seller"));
+  const customerAccounts = users.filter((u) => !u.roles?.includes("seller") && !u.roles?.includes("admin"));
+  const adminAccounts = users.filter((u) => u.roles?.includes("admin"));
+
+  const filteredUsers = users.filter((u) => {
+    const matchRole =
+      userRoleFilter === "all" ||
+      (userRoleFilter === "seller" && u.roles?.includes("seller")) ||
+      (userRoleFilter === "user" && !u.roles?.includes("seller") && !u.roles?.includes("admin")) ||
+      (userRoleFilter === "admin" && u.roles?.includes("admin"));
+    const q = userSearch.toLowerCase();
+    const matchSearch =
+      !q || u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q);
+    return matchRole && matchSearch;
+  });
+
   const filteredOrders = orders.filter((o) => {
     const matchesStatus = statusFilter === "all" || o.status === statusFilter;
     const matchesSearch =
@@ -172,31 +204,31 @@ export default function AdminDashboardPage() {
   );
 
   const TABS = [
-    { key: "orders", label: `Orders (${orders.length})`, icon: Package },
-    { key: "users", label: `Users (${users.length})`, icon: Users },
+    { key: "users", label: `User & Seller Accounts (${users.length})`, icon: Users },
+    { key: "orders", label: `Platform Orders Telemetry (${orders.length})`, icon: Package },
     { key: "categories", label: `Categories (${categories.length})`, icon: Tag },
   ] as const;
 
   return (
-    <DashboardLayout portal="admin" pageTitle="Platform Governance & Health">
-      {/* Platform Governance & Health Header matching Screenshot 1 */}
+    <DashboardLayout portal="admin" pageTitle="Platform Governance & Multi-Seller Management">
+      {/* Platform Governance & Health Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Platform Governance & Health
+              Platform Governance &amp; Multi-Seller Management
             </h1>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>SYSTEMS OPERATIONAL (99.98%)</span>
+              <span>MARKETPLACE ACTIVE (99.98%)</span>
             </div>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Real-time marketplace telemetry, risk mitigation, and compliance supervision.
+            Supervise registered sellers, manage platform accounts, categories, and audit cross-merchant orders.
           </p>
         </div>
 
-        {/* Date Filter & Export audit report */}
+        {/* Date Filter */}
         <div className="flex items-center gap-2">
           <div className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800 text-xs">
             <button className="px-3 py-1.5 rounded-lg bg-[#0052FF] text-white font-bold shadow-xs">
@@ -214,65 +246,29 @@ export default function AdminDashboardPage() {
 
       {/* Stats Row with Real Computed Data */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-        {/* Metric 1: Total Revenue */}
+        {/* Metric 1: Verified Sellers */}
         <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <p className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              Total Platform Revenue
+              Registered Sellers
             </p>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#0052FF] flex items-center justify-center">
-              <DollarSign className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center">
+              <Users className="w-4 h-4" />
             </div>
           </div>
           <div>
             <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {formatCurrency(totalRevenue)}
+              {sellerAccounts.length} <span className="text-xs font-normal text-slate-400">sellers</span>
             </p>
-            <p className="text-[11px] text-slate-400 mt-1">From all completed & active orders</p>
+            <p className="text-[11px] text-slate-400 mt-1">Multi-vendor merchants</p>
           </div>
         </div>
 
-        {/* Metric 2: Total Orders */}
+        {/* Metric 2: Customer Accounts */}
         <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <p className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              Total Orders Placed
-            </p>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#0052FF] flex items-center justify-center">
-              <Package className="w-4 h-4" />
-            </div>
-          </div>
-          <div>
-            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {orders.length} <span className="text-xs font-normal text-slate-400">orders</span>
-            </p>
-            <p className="text-[11px] text-slate-400 mt-1">Recorded in database</p>
-          </div>
-        </div>
-
-        {/* Metric 3: Pending Orders */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <p className="font-mono text-[10px] font-bold text-amber-500 uppercase tracking-wider">
-              Pending Orders
-            </p>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-          </div>
-          <div>
-            <p className="text-2xl font-black text-amber-600 tracking-tight">
-              {pendingOrdersCount} <span className="text-xs font-normal text-slate-400">pending</span>
-            </p>
-            <p className="text-[11px] text-slate-400 mt-1">Awaiting dispatch / payment</p>
-          </div>
-        </div>
-
-        {/* Metric 4: Registered Users */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <p className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              Registered Accounts
+              Customer Accounts
             </p>
             <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#0052FF] flex items-center justify-center">
               <Users className="w-4 h-4" />
@@ -280,9 +276,45 @@ export default function AdminDashboardPage() {
           </div>
           <div>
             <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {users.length} <span className="text-xs font-normal text-slate-400">users</span>
+              {customerAccounts.length} <span className="text-xs font-normal text-slate-400">buyers</span>
             </p>
-            <p className="text-[11px] text-slate-400 mt-1">Buyers, sellers & admins</p>
+            <p className="text-[11px] text-slate-400 mt-1">Platform shoppers</p>
+          </div>
+        </div>
+
+        {/* Metric 3: Total Orders */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Platform Orders
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 flex items-center justify-center">
+              <Package className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {orders.length} <span className="text-xs font-normal text-slate-400">orders</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">Fulfilled by individual sellers</p>
+          </div>
+        </div>
+
+        {/* Metric 4: Total Platform Revenue */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Gross Marketplace Volume
+            </p>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center">
+              <DollarSign className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {formatCurrency(totalRevenue)}
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1">Across all merchant stores</p>
           </div>
         </div>
       </div>
@@ -335,25 +367,177 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* ── ORDERS TAB ── */}
+        {/* ── USERS TAB (PRIMARY ADMIN RESPONSIBILITY) ── */}
+        {activeTab === "users" && (
+          <>
+            {/* User Filters & Role Switcher */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 px-6 py-4 border-b border-zinc-100 dark:border-zinc-800/60 bg-zinc-50/50 dark:bg-zinc-900/30">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="Search user email, store ID..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-[#0052FF]"
+                />
+              </div>
+
+              {/* Role filter buttons */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  onClick={() => setUserRoleFilter("all")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    userRoleFilter === "all"
+                      ? "bg-[#0052FF] text-white shadow-sm"
+                      : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-400"
+                  }`}
+                >
+                  All ({users.length})
+                </button>
+                <button
+                  onClick={() => setUserRoleFilter("seller")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    userRoleFilter === "seller"
+                      ? "bg-amber-500 text-white shadow-sm"
+                      : "bg-white dark:bg-zinc-800 text-amber-600 dark:text-amber-400 border border-zinc-200 dark:border-zinc-700 hover:border-amber-400"
+                  }`}
+                >
+                  🏪 Sellers ({sellerAccounts.length})
+                </button>
+                <button
+                  onClick={() => setUserRoleFilter("user")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    userRoleFilter === "user"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 border border-zinc-200 dark:border-zinc-700 hover:border-indigo-400"
+                  }`}
+                >
+                  🛍️ Customers ({customerAccounts.length})
+                </button>
+                <button
+                  onClick={() => setUserRoleFilter("admin")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    userRoleFilter === "admin"
+                      ? "bg-rose-600 text-white shadow-sm"
+                      : "bg-white dark:bg-zinc-800 text-rose-600 dark:text-rose-400 border border-zinc-200 dark:border-zinc-700 hover:border-rose-400"
+                  }`}
+                >
+                  🛡️ Admins ({adminAccounts.length})
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-zinc-50/80 dark:bg-zinc-800/40 border-b border-zinc-100 dark:border-zinc-800">
+                  <tr>
+                    <th className="py-3.5 px-6 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Account Details</th>
+                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Platform Role</th>
+                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Joined Date</th>
+                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+                  {filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="py-16 text-center text-zinc-400 text-sm">
+                        No accounts match the current filter criteria
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredUsers.map((u) => {
+                      const isSeller = u.roles?.includes("seller");
+                      const isAdmin = u.roles?.includes("admin");
+                      return (
+                        <tr key={u.id} className="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                                isAdmin
+                                  ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
+                                  : isSeller
+                                  ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                                  : "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                              }`}>
+                                {u.email?.[0]?.toUpperCase() || "U"}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm truncate">{u.email}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <p className="font-mono text-[10px] text-zinc-400">ID: {u.id.substring(0, 14)}...</p>
+                                  {isSeller && (
+                                    <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                                      • Merchant Store Account
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex flex-wrap gap-1.5">
+                              {u.roles?.map((r) => (
+                                <span key={r} className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                  r === "admin" ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900"
+                                  : r === "seller" ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-900"
+                                  : "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900"
+                                }`}>{r}</span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-zinc-500 text-xs">{formatDate(u.created_at)}</td>
+                          <td className="py-4 px-4 text-right">
+                            <button
+                              onClick={() => handleDeleteUser(u.id, u.email)}
+                              className="p-2 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                              title="Delete this user account"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {/* ── ORDERS TAB (PLATFORM TELEMETRY & AUDIT ONLY) ── */}
         {activeTab === "orders" && (
           <>
+            {/* Marketplace Governance Notice */}
+            <div className="px-6 py-3 bg-blue-50/70 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900/50 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2.5 text-xs text-blue-900 dark:text-blue-200">
+                <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                <span>
+                  <strong>Multi-Vendor Marketplace Oversight:</strong> Customer orders are fulfilled and shipped directly by the respective store sellers. Platform administrators oversee transaction compliance and dispute resolution.
+                </span>
+              </div>
+            </div>
+
             {/* Filters */}
             <div className="flex items-center gap-3 px-6 py-3 border-b border-zinc-100 dark:border-zinc-800/60">
               <div className="relative flex-1 max-w-xs">
                 <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder="Search by order ID, phone..."
+                  placeholder="Search order ID, phone, customer..."
                   value={orderSearch}
                   onChange={(e) => { setOrderSearch(e.target.value); setCurrentPage(1); }}
-                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-[#0052FF]"
                 />
               </div>
+              <label htmlFor="admin-order-status-filter" className="sr-only">Filter by order status</label>
               <select
+                id="admin-order-status-filter"
+                aria-label="Filter orders by status"
                 value={statusFilter}
                 onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                className="px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#0052FF]"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -370,10 +554,10 @@ export default function AdminDashboardPage() {
                 <thead className="bg-zinc-50/80 dark:bg-zinc-800/40 border-b border-zinc-100 dark:border-zinc-800">
                   <tr>
                     <th className="py-3.5 px-6 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Order ID & Date</th>
-                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Customer & Shipping</th>
-                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Total</th>
-                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Status</th>
-                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-right">Update</th>
+                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Customer & Delivery</th>
+                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Total Amount</th>
+                    <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Items</th>
+                    <th className="py-3.5 px-6 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-right">Fulfillment Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
@@ -392,29 +576,23 @@ export default function AdminDashboardPage() {
                         </td>
                         <td className="py-4 px-4">
                           <p className="font-medium text-zinc-800 dark:text-zinc-200 text-xs">{o.phone_number || "No phone"}</p>
-                          <p className="text-[11px] text-zinc-400">{o.logistic_company || "Standard"} • {o.district || "—"}</p>
+                          <p className="text-[11px] text-zinc-400">{o.logistic_company || "Standard Logistics"} • {o.district || "—"}</p>
                         </td>
-                        <td className="py-4 px-4 font-bold text-violet-600 dark:text-violet-400 text-sm">
+                        <td className="py-4 px-4 font-bold text-[#0052FF] text-sm">
                           {formatCurrency(o.total_amount)}
                         </td>
-                        <td className="py-4 px-4">
-                          <span className={`px-3 py-1 rounded-full text-[11px] font-bold border ${getStatusBadgeClass(o.status)}`}>
-                            {o.status.toUpperCase()}
-                          </span>
+                        <td className="py-4 px-4 text-xs text-zinc-500">
+                          {o.order_items?.length || 0} product(s)
                         </td>
-                        <td className="py-4 px-4 text-right">
-                          <select
-                            value={o.status}
-                            onChange={(e) => handleUpdateStatus(o.id, e.target.value)}
-                            className="px-2.5 py-1.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500"
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="paid">Paid</option>
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex flex-col items-end gap-1">
+                            <span className={`px-3 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadgeClass(o.status)}`}>
+                              {o.status.toUpperCase()}
+                            </span>
+                            <span className="text-[10px] text-zinc-400">
+                              Fulfilled by Seller
+                            </span>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -434,7 +612,7 @@ export default function AdminDashboardPage() {
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 disabled:opacity-40 transition-colors">Prev</button>
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((page) => (
                     <button key={page} onClick={() => setCurrentPage(page)}
-                      className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${currentPage === page ? "bg-violet-600 text-white shadow-md shadow-violet-600/25" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"}`}>
+                      className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${currentPage === page ? "bg-[#0052FF] text-white shadow-md shadow-blue-500/25" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"}`}>
                       {page}
                     </button>
                   ))}
@@ -444,53 +622,6 @@ export default function AdminDashboardPage() {
               </div>
             )}
           </>
-        )}
-
-        {/* ── USERS TAB ── */}
-        {activeTab === "users" && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-50/80 dark:bg-zinc-800/40 border-b border-zinc-100 dark:border-zinc-800">
-                <tr>
-                  <th className="py-3.5 px-6 text-xs font-semibold text-zinc-500 uppercase tracking-wide">ID & Email</th>
-                  <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Roles</th>
-                  <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Created</th>
-                  <th className="py-3.5 px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wide text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
-                {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30 transition-colors">
-                    <td className="py-4 px-6">
-                      <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{u.email}</p>
-                      <p className="font-mono text-[10px] text-zinc-400 mt-0.5">ID: {u.id.substring(0, 12)}...</p>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex flex-wrap gap-1.5">
-                        {u.roles?.map((r) => (
-                          <span key={r} className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                            r === "admin" ? "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
-                            : r === "seller" ? "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
-                            : "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
-                          }`}>{r}</span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-zinc-500 text-xs">{formatDate(u.created_at)}</td>
-                    <td className="py-4 px-4 text-right">
-                      <button
-                        onClick={() => handleDeleteUser(u.id, u.email)}
-                        className="p-2 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                        title="Delete this user"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         )}
 
         {/* ── CATEGORIES TAB ── */}
@@ -527,8 +658,12 @@ export default function AdminDashboardPage() {
               className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500" />
           </div>
           <div>
-            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Account Role</label>
-            <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+            <label htmlFor="admin-user-role" className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">Account Role</label>
+            <select
+              id="admin-user-role"
+              aria-label="Account Role"
+              value={newUser.role}
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500">
               <option value="seller">Seller</option>
               <option value="admin">Administrator (Admin)</option>
